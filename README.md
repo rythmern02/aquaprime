@@ -232,6 +232,12 @@ curl -s localhost:3000/api/health
   `(iss, sub)` operator binding, approvals bound to *(borrower, registry, executor, chainId)* with a 120 s TTL and
   consumed atomically before broadcast.
 
+**Agent Pass status.** The integration targets `https://auth.world.org` (production) or `https://sandbox.auth.world.org`.
+Both portals currently gate client registration to allow-listed enterprise Google accounts (`account_not_eligible`).
+Until our account is allow-listed, the full OIDC step-up path is exercised end to end against a
+standards-conformant local IdP (`scripts/e2e-agentpass.mjs`), using the same backend code unchanged. Switching to World is
+`WORLD_AUTH_ISSUER` + `WORLD_AUTH_CLIENT_ID` + `WORLD_AUTH_CLIENT_SECRET`.
+
 **Both paths, demonstrated.** Successful: verify → tier upgrade, approve → SwapVM fill. Unsuccessful: IDKit
 cancel/rejection (tier unchanged); Agent Pass cancelled / abandoned / stale / wrong class / different human /
 replayed → **HTTP 403, no transaction** (`node scripts/e2e-agentpass.mjs run <borrower>` prints all 8 cases).
