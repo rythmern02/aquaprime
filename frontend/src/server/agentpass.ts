@@ -39,8 +39,19 @@ async function discovery(): Promise<Discovery> {
 }
 
 const b64url = (b: Buffer) => b.toString("base64url");
-const acceptedAcr = () =>
-  (process.env.WORLD_AUTH_ACR_VALUES || "").split(",").map((s) => s.trim()).filter(Boolean);
+const DEFAULT_ACR = [
+  "https://world.org/oidc/acr/orb",
+  "https://world.org/oidc/acr/orb-face",
+  "https://world.org/oidc/acr/selfie",
+  "https://world.org/oidc/acr/selfie-face",
+];
+/** Fail-closed: unset → verified-human classes only. Set to "*" to deliberately accept any World account. */
+const acceptedAcr = () => {
+  const raw = process.env.WORLD_AUTH_ACR_VALUES?.trim();
+  if (raw === "*") return [];
+  if (!raw) return DEFAULT_ACR;
+  return raw.split(",").map((s) => s.trim()).filter(Boolean);
+};
 export const approvalTtlMs = () => Number(process.env.AGENT_APPROVAL_TTL || 120) * 1000;
 
 export async function startApproval(action: ApprovalAttempt["action"]) {
