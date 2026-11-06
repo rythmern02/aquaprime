@@ -155,17 +155,19 @@ deployer, keeper, attester and oracle operator, so put its well-known test key i
 7. **Approve Keeper via Agent Pass** → World approval → one transaction: auction fill + backstop `aqua.pull/push` + lender repaid. HF lands at exactly 1.02, with ~15–35% of collateral sold instead of 50–100%.
 
 ### Sepolia
+1. `cp .env.example .env` and fill `PRIVATE_KEY`, `ATTESTER_PRIVATE_KEY`, `KEEPER_PRIVATE_KEY`, `MAKER_PRIVATE_KEY`
+   (maker needs Sepolia USDC from faucet.circle.com, some WETH and gas).
+2. Check balances, feed freshness and roles before spending gas:
 ```bash
-PRIVATE_KEY=... SEPOLIA_RPC_URL=... npm run deploy:sepolia      # real WETH, Circle USDC, Chainlink ETH/USD
+npm run preflight:sepolia
 ```
+3. Deploy (real WETH, Circle USDC, Chainlink ETH/USD), verify, seed the maker's 3 strategies:
 ```bash
-MAKER_PRIVATE_KEY=... SEED_USDC=1000 SEED_AMM_WETH=0.2 npm run seed:sepolia
+npm run deploy:sepolia && npm run verify:sepolia && npm run seed:sepolia
 ```
-
-Set `ATTESTER_PRIVATE_KEY` and `KEEPER_PRIVATE_KEY` at deploy time so roles are split. Then add the generated
-`frontend/src/config/deployments/11155111.json` to `frontend/src/config/index.ts` and set `NEXT_PUBLIC_CHAIN_ID=11155111`.
-On Sepolia every browser read goes through Anon-RPC. `ORACLE_MODE=operator` deploys a stress-test feed instead of
-Chainlink if you need to demo a crash there.
+4. In `frontend/.env.local` set `NEXT_PUBLIC_CHAIN_ID=11155111` and a public `NEXT_PUBLIC_RPC_URL`. The deployment
+   manifest is picked up automatically, and every browser read now goes through Anon-RPC. `ORACLE_MODE=operator` deploys a
+   stress-test feed instead of Chainlink if you need to demo a crash on Sepolia.
 
 ---
 
