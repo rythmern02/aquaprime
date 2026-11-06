@@ -91,6 +91,10 @@ the backstop from MPC wallets without ever depositing.
 | [`contracts/StrategyBuilder.sol`](contracts/StrategyBuilder.sol) | Canonical bytecode builders for the 0xf0 auction and 0xf1 backstop |
 | [`contracts/oracles/OperatorPriceFeed.sol`](contracts/oracles/OperatorPriceFeed.sol) | AggregatorV3 feed for local stress tests (production uses Chainlink) |
 | [`test/AquaPrime.test.ts`](test/AquaPrime.test.ts) | 18 end-to-end tests with real token transfers |
+| [`test/AquaPrime.edge.test.ts`](test/AquaPrime.edge.test.ts) | 20 edge cases + a 40-position property test of the surgical math |
+| [`test/Lifecycle.test.ts`](test/Lifecycle.test.ts) | Full lifecycle integration with token-conservation and custody checks |
+| [`frontend/test`](frontend/test) | Vitest: risk-math parity with the contract, SwapVM dissector, approval state machine, rate limiter |
+| [`frontend/e2e/lifecycle-ui.cjs`](frontend/e2e/lifecycle-ui.cjs) | Playwright: the whole story through the real UI |
 | [`scripts/e2e-agentpass.mjs`](scripts/e2e-agentpass.mjs) | Agent Pass approve/deny E2E against the running backend |
 | [`agent/keeper.ts`](agent/keeper.ts) | Deterministic keeper loop |
 | [`frontend/`](frontend) | Next.js 14 terminal: SLAC, bytecode/register dissector, borrower + keeper console |
@@ -108,15 +112,15 @@ All five AquaPrime contracts are source-verified on [Sourcify](https://repo.sour
 |---|---|
 | Aqua (official, canonical) | [`0x1111113ccf1426a8e30e2bff5e005d929bf6a90a`](https://sepolia.etherscan.io/address/0x1111113ccf1426a8e30e2bff5e005d929bf6a90a) |
 | AquaPrimeRouter (0xf0/0xf1) | [`0xbBae5064B9ff7619F63a9F48a68DD488EF41beF0`](https://sepolia.etherscan.io/address/0xbBae5064B9ff7619F63a9F48a68DD488EF41beF0) |
-| CreditPositionRegistry | [`0xa6e4F3558B287F6Fc659F574ffE3e1264ba90876`](https://sepolia.etherscan.io/address/0xa6e4F3558B287F6Fc659F574ffE3e1264ba90876) |
-| LiquidationExecutor | [`0x686b25A0D6780442C9B68486B1221F6c8FDcB649`](https://sepolia.etherscan.io/address/0x686b25A0D6780442C9B68486B1221F6c8FDcB649) |
+| CreditPositionRegistry | [`0x5274de7873D7381Ff55b6DFd81De2550dd92dE41`](https://sepolia.etherscan.io/address/0x5274de7873D7381Ff55b6DFd81De2550dd92dE41) |
+| LiquidationExecutor | [`0x96a953570Df445ec0f9404eb5505066fB09b14f1`](https://sepolia.etherscan.io/address/0x96a953570Df445ec0f9404eb5505066fB09b14f1) |
 | StrategyBuilder | [`0xA4e413911C2dFBD0f08E1A3C7B9C372bB0867305`](https://sepolia.etherscan.io/address/0xA4e413911C2dFBD0f08E1A3C7B9C372bB0867305) |
 | AquaAMM | [`0xfF720b3E996D5991101bd93A096b1C31C1b1BAD8`](https://sepolia.etherscan.io/address/0xfF720b3E996D5991101bd93A096b1C31C1b1BAD8) |
 | Price feed | Chainlink ETH/USD `0x694AA1769357215DE4FAC081bf1f309aDC325306` |
 | Tokens | Circle USDC `0x1c7D…7238`, WETH `0xfFf9…6B14` |
 
-The maker `0x866E…6814` ships 3 strategies from one 20 USDC wallet (3.0x SLAC). A first loan of 5 USDC was
-`aqua.pull()`ed straight from that wallet; the registry holds 0 USDC. Browser reads go through Anon-RPC on the **Nox mixnet**
+The maker `0x866E…6814` ships 3 strategies from one wallet (3.0x SLAC). Loans are `aqua.pull()`ed straight
+from that wallet; the registry holds 0 USDC. Browser reads go through Anon-RPC on the **Nox mixnet**
 (verified in Chrome: "Private Read Mode: ON").
 
 ## Run it
@@ -128,7 +132,13 @@ yarn            # or npm install
 ```
 
 ```bash
-npm test        # 21 contract tests (18 AquaPrime + 3 template)
+npm test                          # 43 contract tests: unit, edge, property, lifecycle
+```
+```bash
+cd frontend && npm test           # 19 vitest unit tests
+```
+```bash
+cd frontend && npm run test:e2e   # UI lifecycle in Chrome (needs npm run demo:local running)
 ```
 
 Local chain (terminal 1):
