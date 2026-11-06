@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "AquaPrime — zero-custody prime credit & surgical liquidation engine on 1inch Aqua + SwapVM",
   "author": "Degensoft Ltd.",
-  "license": "SEE LICENSE IN LICENSE",
+  "license": "MIT",
   "scripts": {
     "precompile": "mkdir -p node_modules/forge-std && rsync -a node_modules/forge-std/src/ node_modules/forge-std/",
     "build": "npm run precompile && hardhat compile",
