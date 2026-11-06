@@ -18,5 +18,40 @@
     "attester": "0x4470A4f636d1FF870F04aaE7cBd6c16D9f9768E7",
     "keeper": "0x68A538Cb81DCe8Bfd14579FD3A4340Db7b98C8b2"
   },
-  "oracleMode": "chainlink"
+  "oracleMode": "chainlink",
+  "strategies": {
+    "maker": "0x866E1604a215F5e4d50382d4328dfe69A86D6814",
+    "creditLine": {
+      "hash": "0x720ed407e2d69f523ef2cf9317a1179f6b9aec17c2a3b15cf4d0526900437ac0",
+      "aprBps": 800,
+      "salt": 1793997985,
+      "amount": "20000000"
+    },
+    "backstop": {
+      "order": {
+        "maker": "0x866E1604a215F5e4d50382d4328dfe69A86D6814",
+        "traits": "0x4000000000280028002800280000000000000000000000000000000000000000",
+        "data": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238fff9976782d46cc05630d1f6ebab18b2324d6b142f0a8486b1221f6c8fdcb649f12e694aa1769357215de4fac081bf1f309adc325306fff9976782d46cc05630d1f6ebab18b2324d6b14006400001c201901001408000000006aee3ca1"
+      },
+      "hash": "0xb0dc5154555875869ace6ae480e064fd0b2fccb3c8397d374c51ea5a717fb151",
+      "discountBps": 100,
+      "amount": "20000000"
+    },
+    "amm": {
+      "order": {
+        "maker": "0x866E1604a215F5e4d50382d4328dfe69A86D6814",
+        "traits": "0x4000000000280028002800280000000000000000000000000000000000000000",
+        "data": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238fff9976782d46cc05630d1f6ebab18b2324d6b141504002dc6c011001408000000006aee3ca1"
+      },
+      "hash": "0xa1e0b7676679f0712a4b745b03304f98fae6530d88bee1127faf5c6bd9a1c4b8",
+      "tokens": [
+        "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+      ],
+      "amounts": [
+        "20000000",
+        "50000000000000000"
+      ]
+    }
+  }
 }
