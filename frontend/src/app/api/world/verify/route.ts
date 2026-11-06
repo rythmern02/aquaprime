@@ -10,11 +10,9 @@ import { rateLimit } from "@/server/ratelimit";
 
 export const dynamic = "force-dynamic";
 
-const VERIFY_BASE: Record<string, string> = {
-  production: "https://developer.world.org",
-  sandbox: "https://developer.world.org",
-  staging: "https://staging-developer.worldcoin.org",
-};
+// One Developer Portal for all environments: the proof's `environment` field selects staging/sandbox/production.
+// Override only if World points you at a separate portal host.
+const VERIFY_BASE = process.env.WORLD_VERIFY_BASE || "https://developer.world.org";
 
 type ResponseItem = { identifier: string; signal_hash?: string; nullifier?: string };
 
@@ -48,7 +46,7 @@ export async function POST(req: Request) {
       throw new HttpError(400, "Proof of Human credential required", "wrong_credential");
 
     const rpId = requireEnv("WORLD_RP_ID");
-    const res = await fetch(`${VERIFY_BASE[WORLD.environment]}/api/v4/verify/${rpId}`, {
+    const res = await fetch(`${VERIFY_BASE}/api/v4/verify/${rpId}`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(result),
