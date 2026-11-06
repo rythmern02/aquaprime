@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { encodeAbiParameters, parseEther, parseUnits, type Address, type Hex } from "viem";
 import type { IDKitResult, RpContext } from "@worldcoin/idkit";
 import { deployment } from "@/config";
@@ -22,10 +23,13 @@ export function useAquaActions(log: Log) {
   const { send, pending, account } = useTx();
   const { client } = useReads();
   const [busy, setBusy] = useState<string | null>(null);
+  const qc = useQueryClient();
 
+  // every action — wallet tx or backend call — refreshes on-chain views immediately, success or not
   const run = async (label: string, fn: () => Promise<void>) => {
     setBusy(label);
-    try { await fn(); return true; } catch (e) { log("err", `${label}: ${revertReason(e)}`); return false; } finally { setBusy(null); }
+    try { await fn(); return true; } catch (e) { log("err", `${label}: ${revertReason(e)}`); return false; }
+    finally { setBusy(null); await qc.invalidateQueries(); }
   };
 
   const ensureAllowance = async (token: Address, spender: Address, amount: bigint) => {
