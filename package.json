@@ -1,7 +1,7 @@
 {
-  "name": "swap-vm-template",
+  "name": "aquaprime",
   "version": "0.0.1",
-  "description": "",
+  "description": "AquaPrime — zero-custody prime credit & surgical liquidation engine on 1inch Aqua + SwapVM",
   "author": "Degensoft Ltd.",
   "license": "SEE LICENSE IN LICENSE",
   "scripts": {
@@ -9,8 +9,14 @@
     "build": "npm run precompile && hardhat compile",
     "test": "npm run precompile && hardhat test",
     "deploy": "hardhat deploy --network",
-    "deploy:localhost": "hardhat deploy --network localhost",
-    "clean": "rimraf artifacts cache coverage contracts/hardhat-dependency-compiler deployments typechain-types"
+    "deploy:localhost": "hardhat deploy --network localhost && npm run export-abis",
+    "clean": "rimraf artifacts cache coverage contracts/hardhat-dependency-compiler deployments typechain-types",
+    "node": "hardhat node",
+    "deploy:sepolia": "hardhat deploy --network sepolia && npm run export-abis",
+    "seed:localhost": "hardhat run scripts/seed-strategies.ts --network localhost",
+    "seed:sepolia": "hardhat run scripts/seed-strategies.ts --network sepolia",
+    "export-abis": "ts-node --transpile-only scripts/export-abis.ts",
+    "keeper": "ts-node --transpile-only agent/keeper.ts"
   },
   "dependencies": {
     "@1inch/aqua": "https://github.com/1inch/aqua#6f05aa1ac2dcf701b0e086ad5e7606515f1fa454",
@@ -41,7 +47,7 @@
     "typechain": "^8.3.2",
     "typescript": "^5.9.3"
   },
-  "resolutions":{
+  "resolutions": {
     "elliptic": "6.6.1",
     "@1inch/aqua": "https://github.com/1inch/aqua#6f05aa1ac2dcf701b0e086ad5e7606515f1fa454",
     "@1inch/solidity-utils": "6.9.7",
