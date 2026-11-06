@@ -39,3 +39,8 @@ lerna-debug.log*
 deployments/localhost/
 deployments/hardhat/
 
+
+# local env variants (never published)
+*.local
+.env.*
+!.env.example
