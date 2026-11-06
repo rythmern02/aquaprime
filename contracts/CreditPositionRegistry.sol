@@ -39,6 +39,7 @@ contract CreditPositionRegistry is AquaApp, ICreditRegistry, IMakerHooks, EIP712
     uint256 internal constant BPS = 10_000;
     uint256 internal constant YEAR = 365 days;
     uint8 internal constant AQUA_DOCKED = 0xff;
+    uint256 internal constant COLLATERAL_DUST = 1e9;
     bytes32 public constant HUMAN_ATTESTATION_TYPEHASH =
         keccak256("HumanAttestation(address wallet,uint256 nullifier,uint256 deadline)");
 
@@ -386,7 +387,10 @@ contract CreditPositionRegistry is AquaApp, ICreditRegistry, IMakerHooks, EIP712
         _accrue(p);
 
         // collateral: slice to the liquidator (already pulled by Aqua) + protocol fee to treasury
-        uint256 fee = Math.min(amountOut * params.liquidationFeeBps / BPS, p.collateral - amountOut);
+        uint256 remaining = p.collateral - amountOut;
+        uint256 fee = Math.min(amountOut * params.liquidationFeeBps / BPS, remaining);
+        // rounding dust (≤ 1 gwei of collateral) is swept so an exhausted position can close and book bad debt
+        if (remaining - fee <= COLLATERAL_DUST) fee = remaining;
         p.collateral -= amountOut + fee;
         if (fee > 0) {
             totalProtocolLiquidationRevenue += fee;
