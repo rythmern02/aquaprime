@@ -11,7 +11,7 @@ import { useMaker, useMarket, usePosition } from "@/hooks/useProtocol";
 import { useLog } from "@/hooks/useTx";
 import { useAquaActions } from "@/hooks/useAquaActions";
 import { DEMO_ROLES, useDemoWallet, type DemoRole } from "@/hooks/useDemoWallet";
-import { simulate } from "@/lib/riskmath";
+import { legacyLiquidation, simulate } from "@/lib/riskmath";
 import { bps, eth, short, usd } from "@/lib/format";
 import { WalletButton } from "@/components/SiteNav";
 import { Activity, PositionCard } from "./Vitals";
@@ -94,7 +94,7 @@ export function Playground() {
     lend: !!maker.data,
     borrow: !!p && p.debt > 0n,
     verify: !!p?.human,
-    stress: !!p && (p.healthFactor < E18 || p.auctionActive),
+    stress: !!p && (p.healthFactor < E18 || p.auctionActive) || lines.some((l) => l.msg.startsWith("Surgical fill executed")),
     rescue: lines.some((l) => l.msg.startsWith("Surgical fill executed")),
   };
   const [step, setStep] = useState<StepId>("lend");
@@ -108,6 +108,7 @@ export function Playground() {
   const [apr, setApr] = useState("8");
   const [price, setPrice] = useState(2500);
   const [rp, setRp] = useState<RpContext>();
+  const [before, setBefore] = useState<{ coll: number; hf: number; debt: number; price: number }>();
   const [idkitOpen, setIdkitOpen] = useState(false);
 
   useEffect(() => { if (market.data?.price) setPrice(Number(market.data.price) / 1e6); }, [market.data?.price]);
@@ -242,10 +243,26 @@ export function Playground() {
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <button className="btn-danger !min-h-[56px]" disabled={busy} onClick={() => a.deniedPath(me)}><X className="h-4 w-4" aria-hidden /> Test denied path</button>
-            <button className="btn-primary !min-h-[56px]" disabled={busy || !p?.auctionActive || graceLeft > 0} onClick={() => a.approveAndExecute(me, idp.data?.label ?? "IdP")}>
+            <button className="btn-primary !min-h-[56px]" disabled={busy || !p?.auctionActive || graceLeft > 0}
+              onClick={() => { if (p) setBefore({ coll: Number(p.collateral) / 1e18, hf: Number(p.healthFactor) / 1e18, debt: Number(p.debt) / 1e6, price: Number(market.data?.price ?? 0n) / 1e6 }); a.approveAndExecute(me, idp.data?.label ?? "IdP"); }}>
               <Zap className="h-4 w-4" aria-hidden /> Approve & rescue
             </button>
           </div>
+          {done.rescue && before && p && (() => {
+            const after = Number(p.collateral) / 1e18, sold = before.coll - after;
+            const legacy = legacyLiquidation(before.coll, before.debt, before.price, before.hf).collateralOut;
+            return (
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-bloom/30 bg-bloom/[0.06] p-5">
+                <div className="eyebrow mb-3 text-bloom">rescued</div>
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <div><div className="num text-2xl">{before.hf.toFixed(3)} → <span className="text-bloom">{(Number(p.healthFactor) / 1e18).toFixed(3)}</span></div><div className="text-[11px] text-ink-400">health</div></div>
+                  <div><div className="num text-2xl">{sold.toFixed(3)}</div><div className="text-[11px] text-ink-400">WETH sold ({((sold / before.coll) * 100).toFixed(1)}%)</div></div>
+                  <div><div className="num text-2xl text-bloom">{after.toFixed(3)}</div><div className="text-[11px] text-ink-400">WETH you keep</div></div>
+                </div>
+                <p className="mt-3 text-xs text-ink-400">A legacy close-factor liquidation would have sold ≈{legacy.toFixed(2)} WETH at a fixed 5% bonus — you kept {(legacy - sold).toFixed(2)} WETH more.</p>
+              </motion.div>
+            );
+          })()}
           {idp.data && (
             <span className={`chip w-fit ${idp.data.isWorld ? "border-bloom/40 text-bloom" : "border-amber/40 bg-amber/10 text-amber"}`}>
               {!idp.data.isWorld && <ShieldAlert className="h-3 w-3" aria-hidden />} approvals via {idp.data.label}
