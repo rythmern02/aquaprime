@@ -6,12 +6,12 @@ import * as THREE from "three";
 /**
  * The "wallet core": a breathing particle sphere (your capital, which never moves) with three orbiting
  * strategy rings drawing light from it (credit line · backstop · AMM). SLAC made visible: one vessel,
- * many simultaneous jobs. `stress` (0..1) turns the core ember-red as a position approaches insolvency.
+ * many simultaneous jobs. `stress` (0..1) bleeds signal-orange into the core as a position approaches insolvency.
  */
 function Core({ stress }: { stress: number }) {
   const pts = useRef<THREE.Points>(null);
   const geo = useMemo(() => {
-    const n = 2600, pos = new Float32Array(n * 3), seed = new Float32Array(n);
+    const n = 3200, pos = new Float32Array(n * 3), seed = new Float32Array(n);
     for (let i = 0; i < n; i++) {
       const u = Math.random(), v = Math.random();
       const th = 2 * Math.PI * u, ph = Math.acos(2 * v - 1), r = 1 + (Math.random() - 0.5) * 0.08;
@@ -24,7 +24,7 @@ function Core({ stress }: { stress: number }) {
     return g;
   }, []);
   const mat = useMemo(() => new THREE.ShaderMaterial({
-    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    transparent: true, depthWrite: false,
     uniforms: { uTime: { value: 0 }, uStress: { value: 0 } },
     vertexShader: `
       uniform float uTime; uniform float uStress; attribute float seed; varying float vS; varying float vD;
@@ -33,16 +33,16 @@ function Core({ stress }: { stress: number }) {
         float w = sin(p.y * 4.0 + uTime * 1.3 + seed * 6.28) * 0.04 + sin(p.x * 3.0 - uTime) * 0.03;
         p *= 1.0 + w + uStress * 0.06 * sin(uTime * 9.0 + seed * 20.0);
         vec4 mv = modelViewMatrix * vec4(p, 1.0);
-        gl_PointSize = (3.4 + seed * 3.6) * (3.2 / -mv.z);
+        gl_PointSize = (2.4 + seed * 2.6) * (3.2 / -mv.z);
         gl_Position = projectionMatrix * mv; vS = seed; vD = -mv.z;
       }`,
     fragmentShader: `
       uniform float uStress; varying float vS; varying float vD;
       void main(){
         float d = length(gl_PointCoord - .5); if (d > .5) discard;
-        vec3 tide = vec3(.36,.95,.90), pulse = vec3(.55,.36,1.0), ember = vec3(1.0,.30,.43);
-        vec3 c = mix(mix(tide, pulse, vS), ember, uStress);
-        gl_FragColor = vec4(c * 1.25, (1.0 - d * 2.0) * (.75 + .25 * vS) * smoothstep(6.5, 3.0, vD));
+        vec3 bone = vec3(.93,.92,.90), signal = vec3(1.0,.36,.14);
+        vec3 c = mix(bone, signal, uStress * step(.35, vS));
+        gl_FragColor = vec4(c, smoothstep(.5, .3, d) * (.6 + .4 * vS) * smoothstep(6.5, 3.4, vD));
       }`,
   }), []);
   useFrame((s) => {
@@ -59,7 +59,7 @@ function Ring({ radius, tilt, speed, color, flow }: { radius: number; tilt: [num
   const curve = useMemo(() => new THREE.EllipseCurve(0, 0, radius, radius, 0, Math.PI * 2, false, 0), [radius]);
   const line = useMemo(() => {
     const g = new THREE.BufferGeometry().setFromPoints(curve.getPoints(160).map((p) => new THREE.Vector3(p.x, p.y, 0)));
-    return new THREE.Line(g, new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.35, blending: THREE.AdditiveBlending }));
+    return new THREE.Line(g, new THREE.LineBasicMaterial({ color: "#EDEBE5", transparent: true, opacity: 0.3 }));
   }, [curve, color]);
   useFrame((s) => {
     const t = (s.clock.elapsedTime * speed * flow) % 1;
@@ -71,7 +71,7 @@ function Ring({ radius, tilt, speed, color, flow }: { radius: number; tilt: [num
     <group ref={grp} rotation={[tilt[0], tilt[1], 0]}>
       <primitive object={line} />
       <mesh ref={bead}>
-        <sphereGeometry args={[0.045, 16, 16]} />
+        <sphereGeometry args={[0.035, 16, 16]} />
         <meshBasicMaterial color={color} />
       </mesh>
     </group>
@@ -90,12 +90,11 @@ function Rig({ children }: { children: React.ReactNode }) {
 
 /** CSS-only stand-in used when WebGL is unavailable (or crashes): same idea, zero GPU. */
 function CssOrb({ stress }: { stress: number }) {
-  const core = stress > 0.5 ? "from-ember/70 via-pulse/40" : "from-tide/60 via-pulse/40";
   return (
     <div className="relative h-full w-full">
-      <div className={`absolute inset-[26%] rounded-full bg-gradient-radial bg-gradient-to-br ${core} to-transparent blur-md`} />
-      <div className="absolute inset-[26%] rounded-full border border-white/10" />
-      {[["inset-[14%]", "border-tide/40", "18s"], ["inset-[8%]", "border-pulse/40", "26s"], ["inset-[2%]", "border-bloom/30", "34s"]].map(([i, c, d]) => (
+      <div className={`absolute inset-[26%] rounded-full border ${stress > 0.5 ? "border-signal/60" : "border-fg/25"}`}
+        style={{ backgroundImage: "radial-gradient(rgba(237,235,229,.35) 1px, transparent 1.2px)", backgroundSize: "7px 7px" }} />
+      {[["inset-[14%]", "border-signal/50", "18s"], ["inset-[8%]", "border-fg/15", "26s"], ["inset-[2%]", "border-fg/10", "34s"]].map(([i, c, d]) => (
         <div key={i} className={`absolute ${i} rounded-full border ${c} [transform:rotateX(68deg)]`} style={{ animation: `spin ${d} linear infinite` }} />
       ))}
       <style>{`@keyframes spin{from{transform:rotateX(68deg) rotateZ(0)}to{transform:rotateX(68deg) rotateZ(360deg)}}`}</style>
@@ -122,9 +121,9 @@ export default function LiquidityOrb({ stress = 0, rings = 3, className = "" }: 
   useEffect(() => setGl(webglAvailable()), []);
   const reduce = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const defs = [
-    { radius: 1.55, tilt: [1.1, 0.2] as [number, number], speed: 0.22, color: "#5CF2E6" },
-    { radius: 1.85, tilt: [0.5, -0.9] as [number, number], speed: 0.16, color: "#8B5CFF" },
-    { radius: 2.15, tilt: [1.9, 0.7] as [number, number], speed: 0.12, color: "#C8FF5A" },
+    { radius: 1.55, tilt: [1.1, 0.2] as [number, number], speed: 0.22, color: "#FF5B24" },
+    { radius: 1.85, tilt: [0.5, -0.9] as [number, number], speed: 0.16, color: "#EDEBE5" },
+    { radius: 2.15, tilt: [1.9, 0.7] as [number, number], speed: 0.12, color: "#8C887F" },
   ];
   const fallback = <CssOrb stress={stress} />;
   return (
