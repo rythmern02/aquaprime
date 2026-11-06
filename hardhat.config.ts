@@ -61,6 +61,7 @@ const config: HardhatUserConfig = {
   typechain: {
     outDir: "typechain-types",
   },
+  sourcify: { enabled: true },
   etherscan: {
     apiKey: {
       // Add your Etherscan API keys here
