@@ -9,6 +9,7 @@ export const toOrder = (o: OrderStruct | Order): Order => ({ maker: o.maker, tra
 export interface Deployment {
   chainId: number;
   network: string;
+  deployBlock?: number;
   oracleMode: "operator" | "chainlink";
   contracts: {
     aqua: Address; weth: Address; usdc: Address; priceFeed: Address; router: Address;
