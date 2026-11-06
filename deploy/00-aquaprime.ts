@@ -69,6 +69,23 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const executor = (await deploy("LiquidationExecutor", { ...opts, args: [aqua, router, registry, deployer] })).address;
   const aquaAMM = (await deploy("AquaAMM", { ...opts, args: [aqua] })).address;
 
+  // Oracle freshness bound (Chainlink Sepolia heartbeats lag; mainnet ETH/USD heartbeat is 3600s)
+  const staleness = Number(process.env.MAX_PRICE_STALENESS || (isLocal ? 3600 : 7200));
+  {
+    const reg = await ethers.getContractAt("CreditPositionRegistry", registry);
+    const p = await reg.params();
+    if (Number(p.maxPriceStaleness) !== staleness) {
+      const next = {
+        anonRatioBps: p.anonRatioBps, humanRatioBps: p.humanRatioBps, targetHfBps: p.targetHfBps,
+        startDiscountBps: p.startDiscountBps, maxDiscountBps: p.maxDiscountBps, auctionDuration: p.auctionDuration,
+        humanGracePeriod: p.humanGracePeriod, liquidationFeeBps: p.liquidationFeeBps, reserveFactorBps: p.reserveFactorBps,
+        maxPriceStaleness: staleness,
+      };
+      await (await reg.setParams(next)).wait();
+      console.log(`maxPriceStaleness → ${staleness}s`);
+    }
+  }
+
   if (keeper.toLowerCase() !== deployer.toLowerCase()) {
     const ex = await ethers.getContractAt("LiquidationExecutor", executor);
     if (!(await ex.operators(keeper))) await (await ex.setOperator(keeper, true)).wait();
