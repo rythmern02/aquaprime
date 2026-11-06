@@ -7,11 +7,11 @@ import { disassemble, splitOrder, type Instruction } from "@/lib/swapvm";
 import { bps, eth, short, usd } from "@/lib/format";
 
 const BANK_STYLE: Record<Instruction["bank"], string> = {
-  aquaprime: "border-prime-500/70 bg-prime-500/15 text-prime-400",
-  curve: "border-aqua-500/60 bg-aqua-500/10 text-aqua-300",
-  fee: "border-amber-500/60 bg-amber-500/10 text-amber-300",
-  control: "border-slate-500/50 bg-slate-500/10 text-ink-300",
-  access: "border-emerald-500/60 bg-emerald-500/10 text-emerald-300",
+  aquaprime: "border-signal/70 bg-signal/15 text-signal",
+  curve: "border-fg/60 bg-fg/10 text-fg",
+  fee: "border-warn/60 bg-warn/10 text-warn",
+  control: "border-fg-4/50 bg-fg-4/10 text-fg-2",
+  access: "border-ok/60 bg-ok/10 text-ok",
 };
 
 type Tab = "auction" | "backstop" | "amm";
@@ -45,10 +45,10 @@ export function BytecodePanel({ borrower, auctionActive }: { borrower?: Address;
     <section className="panel flex flex-col gap-5">
       <div className="flex items-start justify-between">
         <div>
-          <div className="panel-title">02 · SwapVM Bytecode &amp; Register Dissector</div>
-          <h2 className="mt-1 text-lg font-semibold text-white">What actually runs on AquaPrimeRouter</h2>
+          <div className="label">02 · SwapVM Bytecode &amp; Register Dissector</div>
+          <h2 className="mt-1 text-lg font-semibold text-fg">What actually runs on AquaPrimeRouter</h2>
         </div>
-        <span className="chip border-prime-500/50 text-prime-400">custom bank 0xf0+</span>
+        <span className="tag border-signal/50 text-signal">custom bank 0xf0+</span>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -58,18 +58,18 @@ export function BytecodePanel({ borrower, auctionActive }: { borrower?: Address;
           ["amm", "AquaAMM · stock", true],
         ] as const).map(([k, label, enabled]) => (
           <button key={k} disabled={!enabled}
-            className={`btn !px-3 !py-1.5 text-xs ${effectiveTab === k ? "bg-white/10 text-white" : "border border-white/10 text-ink-400 hover:text-white"}`}
+            className={`btn !px-3 !py-1.5 text-xs ${effectiveTab === k ? "bg-raised text-fg" : "border border-rule text-fg-3 hover:text-fg"}`}
             onClick={() => setTab(k)}>{label}</button>
         ))}
       </div>
-      {!auctionActive && <p className="-mt-3 text-[11px] text-ink-500">The 0xf0 auction order exists only while a position is underwater — the registry ships it into Aqua on demand.</p>}
+      {!auctionActive && <p className="-mt-3 text-[11px] text-fg-4">The 0xf0 auction order exists only while a position is underwater — the registry ships it into Aqua on demand.</p>}
 
       {decoded && order && (
         <>
-          <div className="rounded-xl border border-white/10 bg-black/30 p-3 font-mono text-[11px] leading-relaxed break-all">
-            <span className="text-ink-500">maker</span> <span className="text-ink-300">{short(order.maker, 6)}</span>{" "}
-            <span className="text-ink-500">pair</span> <span className="text-ink-300">{short(decoded.tokenA)}/{short(decoded.tokenB)}</span>
-            {decoded.hooksHex.length > 2 && <> <span className="text-ink-500">hooks</span> <span className="text-ink-400">{decoded.hooksHex.slice(0, 26)}…</span></>}
+          <div className="rounded border border-rule bg-bg p-3 font-mono text-[11px] leading-relaxed break-all">
+            <span className="text-fg-4">maker</span> <span className="text-fg-2">{short(order.maker, 6)}</span>{" "}
+            <span className="text-fg-4">pair</span> <span className="text-fg-2">{short(decoded.tokenA)}/{short(decoded.tokenB)}</span>
+            {decoded.hooksHex.length > 2 && <> <span className="text-fg-4">hooks</span> <span className="text-fg-3">{decoded.hooksHex.slice(0, 26)}…</span></>}
             <div className="mt-2 flex flex-wrap gap-1">
               {decoded.ins.map((i) => (
                 <span key={i.offset} className={`rounded border px-1.5 py-0.5 ${BANK_STYLE[i.bank]}`} title={i.name}>
@@ -81,17 +81,17 @@ export function BytecodePanel({ borrower, auctionActive }: { borrower?: Address;
 
           <ol className="flex flex-col gap-1.5">
             {decoded.ins.map((i, n) => (
-              <li key={i.offset} className="flex items-start gap-3 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2">
-                <span className={`chip shrink-0 font-mono ${BANK_STYLE[i.bank]}`}>0x{i.opcode.toString(16).padStart(2, "0")}</span>
+              <li key={i.offset} className="flex items-start gap-3 rounded-lg border border-rule bg-panel px-3 py-2">
+                <span className={`tag shrink-0 font-mono ${BANK_STYLE[i.bank]}`}>0x{i.opcode.toString(16).padStart(2, "0")}</span>
                 <div className="min-w-0 flex-1">
-                  <div className="text-sm text-white">
-                    {i.name} {i.custom && <span className="ml-1 text-[10px] uppercase tracking-wider text-prime-400">custom</span>}
+                  <div className="text-sm text-fg">
+                    {i.name} {i.custom && <span className="ml-1 text-[10px] uppercase tracking-wider text-signal">custom</span>}
                   </div>
-                  <div className="font-mono text-[11px] text-ink-400">
-                    {Object.entries(i.decoded).map(([k, v]) => <span key={k} className="mr-3">{k}=<span className="text-ink-50">{v.length > 20 ? short(v, 6) : v}</span></span>)}
+                  <div className="font-mono text-[11px] text-fg-3">
+                    {Object.entries(i.decoded).map(([k, v]) => <span key={k} className="mr-3">{k}=<span className="text-fg">{v.length > 20 ? short(v, 6) : v}</span></span>)}
                   </div>
                 </div>
-                <span className="font-mono text-[10px] text-ink-600">pc {i.offset}{n < decoded.ins.length - 1 ? " →" : ""}</span>
+                <span className="font-mono text-[10px] text-fg-4">pc {i.offset}{n < decoded.ins.length - 1 ? " →" : ""}</span>
               </li>
             ))}
           </ol>
@@ -101,23 +101,23 @@ export function BytecodePanel({ borrower, auctionActive }: { borrower?: Address;
       {effectiveTab === "auction" && regs.data && (
         <div>
           <div className="mb-2 flex items-center justify-between">
-            <div className="text-xs font-medium text-ink-300">SwapVM registers — before vs after 0xf0 + curve</div>
-            <span className="font-mono text-[11px] text-ink-500">discount {q ? bps(q.discountBps) : "—"}</span>
+            <div className="text-xs font-medium text-fg-2">SwapVM registers — before vs after 0xf0 + curve</div>
+            <span className="font-mono text-[11px] text-fg-4">discount {q ? bps(q.discountBps) : "—"}</span>
           </div>
           <table className="w-full font-mono text-[12px]">
-            <thead><tr className="text-left text-ink-500"><th className="py-1">register</th><th>Aqua load</th><th>after 0xf0</th><th className="hidden xl:table-cell">note</th></tr></thead>
+            <thead><tr className="text-left text-fg-4"><th className="py-1">register</th><th>Aqua load</th><th>after 0xf0</th><th className="hidden xl:table-cell">note</th></tr></thead>
             <tbody>
               {rows.map(([k, b, a, note]) => (
-                <tr key={k} className="border-t border-white/5">
-                  <td className="py-1.5 text-ink-300">{k}</td>
-                  <td className="text-ink-400">{b}</td>
-                  <td className={a === "revert" ? "text-rose-300" : "text-aqua-300"}>{a}</td>
-                  <td className="hidden text-[11px] text-ink-500 xl:table-cell">{note}</td>
+                <tr key={k} className="border-t border-rule">
+                  <td className="py-1.5 text-fg-2">{k}</td>
+                  <td className="text-fg-3">{b}</td>
+                  <td className={a === "revert" ? "text-signal" : "text-fg"}>{a}</td>
+                  <td className="hidden text-[11px] text-fg-4 xl:table-cell">{note}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-          {regs.data.quoteError && <p className="mt-2 text-xs text-amber-300">router.quote(): {regs.data.quoteError}</p>}
+          {regs.data.quoteError && <p className="mt-2 text-xs text-warn">router.quote(): {regs.data.quoteError}</p>}
         </div>
       )}
     </section>
