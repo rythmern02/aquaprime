@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useRef } from "react";
+import { Component, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -88,21 +88,57 @@ function Rig({ children }: { children: React.ReactNode }) {
   return <group ref={g}>{children}</group>;
 }
 
+/** CSS-only stand-in used when WebGL is unavailable (or crashes): same idea, zero GPU. */
+function CssOrb({ stress }: { stress: number }) {
+  const core = stress > 0.5 ? "from-ember/70 via-pulse/40" : "from-tide/60 via-pulse/40";
+  return (
+    <div className="relative h-full w-full">
+      <div className={`absolute inset-[26%] rounded-full bg-gradient-radial bg-gradient-to-br ${core} to-transparent blur-md`} />
+      <div className="absolute inset-[26%] rounded-full border border-white/10" />
+      {[["inset-[14%]", "border-tide/40", "18s"], ["inset-[8%]", "border-pulse/40", "26s"], ["inset-[2%]", "border-bloom/30", "34s"]].map(([i, c, d]) => (
+        <div key={i} className={`absolute ${i} rounded-full border ${c} [transform:rotateX(68deg)]`} style={{ animation: `spin ${d} linear infinite` }} />
+      ))}
+      <style>{`@keyframes spin{from{transform:rotateX(68deg) rotateZ(0)}to{transform:rotateX(68deg) rotateZ(360deg)}}`}</style>
+    </div>
+  );
+}
+
+class GlBoundary extends Component<{ fallback: ReactNode; children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  componentDidCatch() { /* WebGL unavailable — fallback rendered */ }
+  render() { return this.state.failed ? this.props.fallback : this.props.children; }
+}
+
+function webglAvailable() {
+  try {
+    const c = document.createElement("canvas");
+    return !!(c.getContext("webgl2") || c.getContext("webgl"));
+  } catch { return false; }
+}
+
 export default function LiquidityOrb({ stress = 0, rings = 3, className = "" }: { stress?: number; rings?: number; className?: string }) {
+  const [gl, setGl] = useState<boolean | null>(null);
+  useEffect(() => setGl(webglAvailable()), []);
   const reduce = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const defs = [
     { radius: 1.55, tilt: [1.1, 0.2] as [number, number], speed: 0.22, color: "#5CF2E6" },
     { radius: 1.85, tilt: [0.5, -0.9] as [number, number], speed: 0.16, color: "#8B5CFF" },
     { radius: 2.15, tilt: [1.9, 0.7] as [number, number], speed: 0.12, color: "#C8FF5A" },
   ];
+  const fallback = <CssOrb stress={stress} />;
   return (
     <div className={className} aria-hidden>
-      <Canvas camera={{ position: [0, 0, 5.2], fov: 45 }} dpr={[1, 1.75]} frameloop={reduce ? "demand" : "always"} gl={{ antialias: true, alpha: true }}>
-        <Rig>
-          <Core stress={stress} />
-          {defs.slice(0, rings).map((d) => <Ring key={d.color} {...d} flow={1 - stress * 0.7} />)}
-        </Rig>
-      </Canvas>
+      {gl === false ? fallback : gl && (
+        <GlBoundary fallback={fallback}>
+          <Canvas camera={{ position: [0, 0, 5.2], fov: 45 }} dpr={[1, 1.75]} frameloop={reduce ? "demand" : "always"} gl={{ antialias: true, alpha: true }}>
+            <Rig>
+              <Core stress={stress} />
+              {defs.slice(0, rings).map((d) => <Ring key={d.color} {...d} flow={1 - stress * 0.7} />)}
+            </Rig>
+          </Canvas>
+        </GlBoundary>
+      )}
     </div>
   );
 }
