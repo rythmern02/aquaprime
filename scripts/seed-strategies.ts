@@ -46,6 +46,14 @@ async function main() {
     for (const b of [signers[2], signers[3]]) await (await weth.connect(b).deposit({ value: ethers.parseEther("20") })).wait();
   }
 
+  if (!isLocal) {
+    // live nets: wrap ETH for the AMM leg if needed; USDC must come from a faucet (faucet.circle.com)
+    const have = await weth.balanceOf(makerAddr);
+    if (have < ammWeth) await (await weth.connect(maker).deposit({ value: ammWeth - have })).wait();
+    const usdcHave = await usdc.balanceOf(makerAddr);
+    if (usdcHave < usdcAmt) throw new Error(`maker holds ${ethers.formatUnits(usdcHave, 6)} USDC, needs ${ethers.formatUnits(usdcAmt, 6)} (lower SEED_USDC or use faucet.circle.com)`);
+  }
+
   // one-time approvals: Aqua can pull only what strategies allow, only when a fill happens
   await (await usdc.connect(maker).approve(c.aqua, ethers.MaxUint256)).wait();
   await (await weth.connect(maker).approve(c.aqua, ethers.MaxUint256)).wait();
@@ -60,7 +68,7 @@ async function main() {
 
   // ── B. liquidation backstop (0xf1) ──
   const discountBps = 100;
-  const b = await builder.buildBackstopOrder(makerAddr, c.executor, c.priceFeed, c.weth, c.usdc, discountBps, 3600, salt);
+  const b = await builder.buildBackstopOrder(makerAddr, c.executor, c.priceFeed, c.weth, c.usdc, discountBps, Number(process.env.MAX_PRICE_STALENESS || (isLocal ? 3600 : 7200)), salt);
   const backstop = { maker: b.maker, traits: ethers.toBeHex(b.traits, 32), data: b.data };
   await (await aqua.ship(c.router, ethers.AbiCoder.defaultAbiCoder().encode(ORDER_TUPLE, [[backstop.maker, backstop.traits, backstop.data]]),
     [c.weth, c.usdc], [0, usdcAmt])).wait();

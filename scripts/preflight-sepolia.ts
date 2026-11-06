@@ -46,15 +46,14 @@ async function main() {
     const needWeth = ethers.parseEther(process.env.SEED_AMM_WETH || "40");
     console.log(`maker ${m.address}  ${ethers.formatUnits(usdc, 6)} USDC  ${ethers.formatEther(weth)} WETH  ${ethers.formatEther(eth)} ETH`);
     if (usdc < needUsdc) problems.push(`maker needs ${ethers.formatUnits(needUsdc, 6)} USDC (faucet.circle.com) or lower SEED_USDC`);
-    if (weth < needWeth) problems.push(`maker needs ${ethers.formatEther(needWeth)} WETH (wrap ETH) or lower SEED_AMM_WETH`);
-    if (eth < ethers.parseEther("0.02")) problems.push("maker needs ≥ 0.02 Sepolia ETH for gas");
+    if (weth + eth < needWeth + ethers.parseEther("0.02")) problems.push(`maker needs ${ethers.formatEther(needWeth)} WETH-or-ETH (auto-wrapped) + 0.02 ETH gas`);
   }
 
   const [, answer, , updatedAt] = await new ethers.Contract(FEED, FEED_ABI, ethers.provider).latestRoundData();
   const age = Math.floor(Date.now() / 1000) - Number(updatedAt);
   console.log(`Chainlink ETH/USD ${Number(answer) / 1e8}  (updated ${age}s ago)`);
-  if (process.env.ORACLE_MODE !== "operator" && age > 3600)
-    problems.push("Chainlink Sepolia feed older than the 1h staleness bound — use ORACLE_MODE=operator or raise maxPriceStaleness");
+  if (process.env.ORACLE_MODE !== "operator" && age > Number(process.env.MAX_PRICE_STALENESS || 7200))
+    problems.push("Chainlink Sepolia feed older than MAX_PRICE_STALENESS — use ORACLE_MODE=operator or raise maxPriceStaleness");
 
   if (problems.length) { console.log("\n✘ not ready:\n  - " + problems.join("\n  - ")); process.exit(1); }
   console.log("\n✔ ready: npm run deploy:sepolia && npm run seed:sepolia");
