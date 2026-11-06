@@ -164,6 +164,14 @@ npm run keeper
 For local runs, import hardhat account #2 or #3 into your wallet (they hold demo WETH). Hardhat account #0 is the
 deployer, keeper, attester and oracle operator, so put its well-known test key into `frontend/.env.local`.
 
+### One-command local demo
+```bash
+npm run demo:local
+```
+This boots a hardhat chain, deploys and seeds AquaPrime, opens a borrower (HF 1.11), and starts the Agent Pass test IdP
+and the web app on http://localhost:3000. Agent Pass approvals in this mode come from the local test IdP, and the
+keeper console labels them **"Local test IdP — NOT World"**. Export `WORLD_AUTH_ISSUER/CLIENT_ID/CLIENT_SECRET` to use World.
+
 ### Demo script (≈3 min)
 1. **Panel 1:** the gauge shows 3.0x SLAC. The wallet balance doesn't change while three strategies are live. Click **Dock** to retire one: still zero transfers.
 2. **Panel 3:** deposit 10 WETH and borrow. The console shows USDC moving LP wallet → borrower via `aqua.pull`.
