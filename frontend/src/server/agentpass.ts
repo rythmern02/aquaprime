@@ -204,24 +204,28 @@ export async function completeApproval(params: URLSearchParams) {
  * the protected action never runs on pending / denied / expired / reused / mismatched approvals.
  */
 export async function consumeApproval(attemptId: string, action: ApprovalAttempt["action"]) {
-  return transact((s) => {
+  // Decide inside the transaction, throw outside it — so state changes (expiry → denied) are persisted.
+  const out = await transact((s): { ok: true; a: ApprovalAttempt } | { ok: false; err: HttpError } => {
+    const deny = (msg: string, code: string) => ({ ok: false as const, err: new HttpError(403, `Human authorization denied: ${msg}`, code) });
     const a = s.attempts[attemptId];
-    if (!a) throw new HttpError(403, "Human authorization denied: unknown approval", "unknown_approval");
-    if (a.status === "pending") throw new HttpError(403, "Human authorization denied: approval was never completed (cancelled or abandoned)", "not_completed");
-    if (a.status === "denied") throw new HttpError(403, `Human authorization denied: ${a.denial}`, "denied");
-    if (a.status === "used") throw new HttpError(403, "Human authorization denied: approval already used", "replayed");
+    if (!a) return deny("unknown approval", "unknown_approval");
+    if (a.status === "pending") return deny("approval was never completed (cancelled or abandoned)", "not_completed");
+    if (a.status === "denied") return deny(String(a.denial), "denied");
+    if (a.status === "used") return deny("approval already used", "replayed");
     if (!a.expiresAt || Date.now() > a.expiresAt) {
       a.status = "denied"; a.denial = "expired";
-      throw new HttpError(403, "Human authorization denied: approval expired", "expired");
+      return deny("approval expired", "expired");
     }
     const same = a.action.kind === action.kind && a.action.chainId === action.chainId &&
       a.action.borrower.toLowerCase() === action.borrower.toLowerCase() &&
       a.action.registry.toLowerCase() === action.registry.toLowerCase() &&
       a.action.executor.toLowerCase() === action.executor.toLowerCase();
-    if (!same) throw new HttpError(403, "Human authorization denied: approval is bound to a different action", "action_mismatch");
+    if (!same) return deny("approval is bound to a different action", "action_mismatch");
     a.status = "used";
-    return a;
+    return { ok: true, a };
   });
+  if (!out.ok) throw out.err;
+  return out.a;
 }
 
 export async function recordResult(attemptId: string, txHashes: string[]) {
