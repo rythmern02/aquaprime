@@ -23,12 +23,13 @@ async function main() {
   const isLocal = network.name === "hardhat" || network.name === "localhost";
 
   const signers = await ethers.getSigners();
-  const maker = process.env.MAKER_PRIVATE_KEY
-    ? new ethers.Wallet(process.env.MAKER_PRIVATE_KEY, ethers.provider)
+  const env = (k: string) => (isLocal ? undefined : process.env[k]); // .env targets live nets
+  const maker = env("MAKER_PRIVATE_KEY")
+    ? new ethers.Wallet(env("MAKER_PRIVATE_KEY")!, ethers.provider)
     : signers[1];
   const makerAddr = await maker.getAddress();
-  const usdcAmt = ethers.parseUnits(process.env.SEED_USDC || "100000", 6);
-  const ammWeth = ethers.parseEther(process.env.SEED_AMM_WETH || "40");
+  const usdcAmt = ethers.parseUnits(env("SEED_USDC") || "100000", 6);
+  const ammWeth = ethers.parseEther(env("SEED_AMM_WETH") || "40");
 
   const aqua = await ethers.getContractAt("Aqua", c.aqua, maker);
   const usdc = await ethers.getContractAt("TokenMockDecimals", c.usdc);
