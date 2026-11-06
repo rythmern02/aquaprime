@@ -30,10 +30,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
   const isLocal = network.name === "hardhat" || network.name === "localhost";
+  // Live-network overrides from .env never apply to a local chain (those keys/addresses don't exist there).
+  const env = (k: string) => (isLocal ? undefined : process.env[k]);
   const live = LIVE[network.name];
   const opts = { from: deployer, log: true, waitConfirmations: isLocal ? 1 : 2 };
 
-  const aqua = process.env.AQUA_ADDRESS || (await deploy("Aqua", { ...opts, args: [] })).address;
+  const aqua = env("AQUA_ADDRESS") || (await deploy("Aqua", { ...opts, args: [] })).address;
 
   let weth: string, usdc: string, feed: string;
   if (isLocal) {
@@ -53,12 +55,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     feed = process.env.PRICE_FEED || live.feed;
   }
 
-  const treasury = process.env.TREASURY_ADDRESS || deployer;
-  const attester = process.env.ATTESTER_PRIVATE_KEY
-    ? new ethers.Wallet(process.env.ATTESTER_PRIVATE_KEY).address
+  const treasury = env("TREASURY_ADDRESS") || deployer;
+  const attester = env("ATTESTER_PRIVATE_KEY")
+    ? new ethers.Wallet(env("ATTESTER_PRIVATE_KEY")).address
     : deployer;
-  const keeper = process.env.KEEPER_PRIVATE_KEY
-    ? new ethers.Wallet(process.env.KEEPER_PRIVATE_KEY).address
+  const keeper = env("KEEPER_PRIVATE_KEY")
+    ? new ethers.Wallet(env("KEEPER_PRIVATE_KEY")).address
     : deployer;
 
   const router = (await deploy("AquaPrimeRouter", { ...opts, args: [aqua, weth, deployer] })).address;
