@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+html, body { background: #05080d; color: #d6dee9; }
+body {
+  background-image:
+    radial-gradient(1200px 600px at 10% -10%, rgba(22, 189, 212, 0.10), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgba(167, 123, 255, 0.08), transparent 60%);
+  min-height: 100vh;
+}
+
+@layer components {
+  .panel { @apply rounded-2xl border border-ink-700/80 bg-ink-900/80 backdrop-blur p-5 shadow-[0_1px_0_0_rgba(255,255,255,0.03)_inset]; }
+  .panel-title { @apply text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40; }
+  .btn-primary { @apply btn bg-aqua-500 text-ink-950 hover:bg-aqua-400; }
+  .btn-ghost { @apply btn border border-ink-600 bg-ink-850 text-slate-200 hover:border-aqua-600 hover:text-white; }
+  .btn-danger { @apply btn border border-rose-500/50 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20; }
+  .btn-prime { @apply btn bg-prime-500 text-white hover:bg-prime-400; }
+  .input { @apply w-full rounded-lg border border-ink-600 bg-ink-950 px-3 py-2 font-mono text-sm text-slate-100 outline-none focus:border-aqua-500; }
+  .kv { @apply flex items-baseline justify-between gap-3 py-1 text-sm; }
+  .kv dt { @apply text-slate-400; }
+  .kv dd { @apply font-mono text-slate-100; }
+  .chip { @apply inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-medium; }
+}
