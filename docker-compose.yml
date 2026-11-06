@@ -1,0 +1,24 @@
+# Production single-node deployment: web/API + keeper agent.
+# Secrets come from frontend/.env.production (web) and .env (keeper) — never baked into images.
+services:
+  web:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_CHAIN_ID: ${NEXT_PUBLIC_CHAIN_ID:-11155111}
+        NEXT_PUBLIC_RPC_URL: ${NEXT_PUBLIC_RPC_URL:-https://ethereum-sepolia-rpc.publicnode.com}
+        NEXT_PUBLIC_WORLD_APP_ID: ${NEXT_PUBLIC_WORLD_APP_ID:-}
+        NEXT_PUBLIC_WORLD_ENVIRONMENT: ${NEXT_PUBLIC_WORLD_ENVIRONMENT:-production}
+    env_file: ./frontend/.env.production
+    ports: ["3000:3000"]
+    volumes: ["approvals:/app/.data"]   # Agent Pass approval store survives restarts
+    restart: unless-stopped
+  keeper:
+    build: { context: ., dockerfile: Dockerfile.keeper }
+    env_file: ./.env
+    environment:
+      KEEPER_API_URL: http://web:3000
+    depends_on: [web]
+    restart: unless-stopped
+volumes:
+  approvals:
