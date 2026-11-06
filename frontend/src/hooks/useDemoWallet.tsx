@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { createWalletClient, http, type Address, type WalletClient } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { chain, CHAIN_ID, RPC_URL } from "@/config";
@@ -29,13 +29,21 @@ const DemoCtx = createContext<Ctx | null>(null);
 
 export function DemoWalletProvider({ children }: { children: ReactNode }) {
   const available = CHAIN_ID === 31337;
-  const [role, setRole] = useState<DemoRole>();
+  const [role, setRoleState] = useState<DemoRole>();
+  // remember the choice for this tab (survives refresh); never persisted across browsers or to a server
+  useEffect(() => {
+    try { const r = sessionStorage.getItem("aquaprime.demoRole") as DemoRole | null; if (available && r && r in DEMO_ROLES) setRoleState(r); } catch { /* ignore */ }
+  }, [available]);
+  const setRole = useCallback((r?: DemoRole) => {
+    setRoleState(r);
+    try { if (r) sessionStorage.setItem("aquaprime.demoRole", r); else sessionStorage.removeItem("aquaprime.demoRole"); } catch { /* ignore */ }
+  }, []);
   const value = useMemo<Ctx>(() => {
     if (!available || !role) return { available, active: false, enable: setRole, disable: () => setRole(undefined) };
     const account = privateKeyToAccount(DEMO_ROLES[role].key);
     const wallet = createWalletClient({ account, chain, transport: http(RPC_URL) });
     return { available, active: true, role, label: DEMO_ROLES[role].label, address: account.address, wallet, enable: setRole, disable: () => setRole(undefined) };
-  }, [available, role]);
+  }, [available, role, setRole]);
   return <DemoCtx.Provider value={value}>{children}</DemoCtx.Provider>;
 }
 

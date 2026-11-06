@@ -67,11 +67,15 @@ export function Providers({ children }: { children: ReactNode }) {
     queryClient.invalidateQueries();
   };
 
+  // DemoWalletProvider sits ABOVE wagmi: WagmiProvider re-mounts its subtree while it rehydrates/reconnects,
+  // which would otherwise wipe the selected demo wallet.
   return (
+    <DemoWalletProvider>
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <ReadContext.Provider value={{ client, mode, anonStatus, anonError, setMode }}><DemoWalletProvider>{children}</DemoWalletProvider></ReadContext.Provider>
+        <ReadContext.Provider value={{ client, mode, anonStatus, anonError, setMode }}>{children}</ReadContext.Provider>
       </QueryClientProvider>
     </WagmiProvider>
+    </DemoWalletProvider>
   );
 }
