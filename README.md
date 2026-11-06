@@ -91,7 +91,7 @@ the backstop from MPC wallets without ever depositing.
 | [`contracts/StrategyBuilder.sol`](contracts/StrategyBuilder.sol) | Canonical bytecode builders for the 0xf0 auction and 0xf1 backstop |
 | [`contracts/oracles/OperatorPriceFeed.sol`](contracts/oracles/OperatorPriceFeed.sol) | AggregatorV3 feed for local stress tests (production uses Chainlink) |
 | [`test/AquaPrime.test.ts`](test/AquaPrime.test.ts) | 18 end-to-end tests with real token transfers |
-| [`test/agentpass/e2e-agentpass.mjs`](test/agentpass/e2e-agentpass.mjs) | Agent Pass approve/deny E2E against the running backend |
+| [`scripts/e2e-agentpass.mjs`](scripts/e2e-agentpass.mjs) | Agent Pass approve/deny E2E against the running backend |
 | [`agent/keeper.ts`](agent/keeper.ts) | Deterministic keeper loop |
 | [`frontend/`](frontend) | Next.js 14 terminal: SLAC, bytecode/register dissector, borrower + keeper console |
 
@@ -191,7 +191,7 @@ Chainlink if you need to demo a crash there.
 
 **Both paths, demonstrated.** Successful: verify → tier upgrade, approve → SwapVM fill. Unsuccessful: IDKit
 cancel/rejection (tier unchanged); Agent Pass cancelled / abandoned / stale / wrong class / different human /
-replayed → **HTTP 403, no transaction** (`node test/agentpass/e2e-agentpass.mjs run <borrower>` prints all 8 cases).
+replayed → **HTTP 403, no transaction** (`node scripts/e2e-agentpass.mjs run <borrower>` prints all 8 cases).
 
 ### Integration debrief
 * **Time to first success:** _fill in from your run (portal sign-up → first verified proof / first approved token)_.
