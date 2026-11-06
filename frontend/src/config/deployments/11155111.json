@@ -1,0 +1,22 @@
+{
+  "chainId": 11155111,
+  "network": "sepolia",
+  "contracts": {
+    "aqua": "0x1111113ccf1426a8e30e2bff5e005d929bf6a90a",
+    "weth": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+    "usdc": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+    "priceFeed": "0x694AA1769357215DE4FAC081bf1f309aDC325306",
+    "router": "0xbBae5064B9ff7619F63a9F48a68DD488EF41beF0",
+    "builder": "0xA4e413911C2dFBD0f08E1A3C7B9C372bB0867305",
+    "registry": "0xa6e4F3558B287F6Fc659F574ffE3e1264ba90876",
+    "executor": "0x686b25A0D6780442C9B68486B1221F6c8FDcB649",
+    "aquaAMM": "0xfF720b3E996D5991101bd93A096b1C31C1b1BAD8"
+  },
+  "roles": {
+    "deployer": "0x0D0e87B38B050861229e4C987b38B08E911D546E",
+    "treasury": "0x0D0e87B38B050861229e4C987b38B08E911D546E",
+    "attester": "0x4470A4f636d1FF870F04aaE7cBd6c16D9f9768E7",
+    "keeper": "0x68A538Cb81DCe8Bfd14579FD3A4340Db7b98C8b2"
+  },
+  "oracleMode": "chainlink"
+}
