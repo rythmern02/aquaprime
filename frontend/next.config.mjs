@@ -10,7 +10,18 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   async headers() {
-    return [{ source: "/(.*)", headers: securityHeaders }];
+    return [
+      { source: "/((?!anon-rpc-iframe\\.html$).*)", headers: securityHeaders },
+      // Anon-RPC bootstrap page is framed (sandboxed, null-origin) by our own page only
+      {
+        source: "/anon-rpc-iframe.html",
+        headers: [
+          ...securityHeaders.filter((h) => h.key !== "X-Frame-Options"),
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },
+        ],
+      },
+    ];
   },
   webpack: (config) => {
     // wagmi optional peer deps not used in the browser bundle
