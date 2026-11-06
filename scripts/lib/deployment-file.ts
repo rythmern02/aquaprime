@@ -1,0 +1,38 @@
+// SPDX-License-Identifier: MIT
+import fs from "fs";
+import path from "path";
+
+/** Deployment manifest shared by the frontend, the keeper and the scripts. */
+export interface DeploymentFile {
+  chainId: number;
+  network: string;
+  oracleMode: "operator" | "chainlink";
+  contracts: Record<string, string>;
+  roles: Record<string, string>;
+  strategies?: {
+    maker: string;
+    creditLine?: { hash: string; aprBps: number; salt: number; amount: string };
+    backstop?: { order: { maker: string; traits: string; data: string }; hash: string; discountBps: number; amount: string };
+    amm?: { order: { maker: string; traits: string; data: string }; hash: string; amounts: string[]; tokens: string[] };
+  };
+}
+
+export const DEPLOYMENTS_DIR = path.join(__dirname, "..", "..", "frontend", "src", "config", "deployments");
+
+export function deploymentPath(chainId: number) {
+  return path.join(DEPLOYMENTS_DIR, `${chainId}.json`);
+}
+
+export function readDeployment(chainId: number): DeploymentFile {
+  return JSON.parse(fs.readFileSync(deploymentPath(chainId), "utf8"));
+}
+
+export function writeDeployment(chainId: number, data: Partial<DeploymentFile>) {
+  fs.mkdirSync(DEPLOYMENTS_DIR, { recursive: true });
+  let prev: Partial<DeploymentFile> = {};
+  try { prev = readDeployment(chainId); } catch { /* first write */ }
+  const merged = { ...prev, ...data };
+  // a fresh deploy invalidates previously seeded strategies
+  if (data.contracts && prev.contracts && data.contracts.registry !== prev.contracts.registry) delete merged.strategies;
+  fs.writeFileSync(deploymentPath(chainId), JSON.stringify(merged, null, 2) + "\n");
+}
