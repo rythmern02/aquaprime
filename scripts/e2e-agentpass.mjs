@@ -13,7 +13,7 @@
  */
 import http from "node:http";
 import crypto from "node:crypto";
-import { generateKeyPair, exportJWK, SignJWT } from "../../frontend/node_modules/jose/dist/node/esm/index.js";
+import { generateKeyPair, exportJWK, SignJWT } from "../frontend/node_modules/jose/dist/node/esm/index.js";
 
 const PORT = 4455;
 const ISS = `http://127.0.0.1:${PORT}`;
