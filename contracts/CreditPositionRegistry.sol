@@ -53,7 +53,7 @@ contract CreditPositionRegistry is AquaApp, ICreditRegistry, IMakerHooks, EIP712
     struct RiskParams {
         uint16 anonRatioBps;        // 15000 = 150% collateral ratio
         uint16 humanRatioBps;       // 11500 = 115%
-        uint16 targetHfBps;         // 10500 = liquidations restore HF to 1.05
+        uint16 targetHfBps;         // 10200 = liquidations restore HF to exactly 1.02
         uint16 startDiscountBps;    // Dutch auction opening discount
         uint16 maxDiscountBps;      // Dutch auction max discount
         uint32 auctionDuration;     // seconds to ramp from start to max discount
@@ -168,12 +168,12 @@ contract CreditPositionRegistry is AquaApp, ICreditRegistry, IMakerHooks, EIP712
         _setParams(RiskParams({
             anonRatioBps: 15_000,
             humanRatioBps: 11_500,
-            targetHfBps: 10_500,
-            startDiscountBps: 250,
-            maxDiscountBps: 800,
+            targetHfBps: 10_200,
+            startDiscountBps: 150,
+            maxDiscountBps: 600,
             auctionDuration: 600,
             humanGracePeriod: 180,
-            liquidationFeeBps: 100,
+            liquidationFeeBps: 50,
             reserveFactorBps: 1_000,
             maxPriceStaleness: 3_600
         }));
