@@ -238,7 +238,12 @@ replayed → **HTTP 403, no transaction** (`node scripts/e2e-agentpass.mjs run <
 
 ### Integration debrief
 * **Time to first success:** _fill in from your run (portal sign-up → first verified proof / first approved token)_.
-* **Friction we hit:** the Agent Pass guides describe the flow by RFC and don't list concrete endpoints (we had to read
+* **Live result (Sepolia):** a simulator Proof of Human (World ID 4.0, signal = wallet) was verified by the Developer
+  Portal and attested on-chain, so the wallet is now on the 115% tier. Tx
+  [`0x3c42…8a9a`](https://sepolia.etherscan.io/tx/0x3c42ea308730461227ac66669ea0cb959683811867931f4d8b2450a525318a9a).
+* **Friction we hit:** sending a *staging* (simulator) proof to `staging-developer.worldcoin.org` returns
+  `app_not_migrated` for an app created on developer.world.org. The fix is to always call `developer.world.org` and let the
+  body's `environment` field select staging. the Agent Pass guides describe the flow by RFC and don't list concrete endpoints (we had to read
   them from discovery). The accepted `acr` values had to be assembled from the step-up guide. The IDKit verify docs don't
   spell out that apps must check `signal_hash` themselves to bind a proof to a wallet. The sandbox needs
   a TestFlight invite plus about an hour of credential issuance.
