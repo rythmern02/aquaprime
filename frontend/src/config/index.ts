@@ -1,6 +1,6 @@
 import { defineChain, type Address, type Hex } from "viem";
 import { hardhat, sepolia, mainnet } from "viem/chains";
-import local from "./deployments/31337.json";
+import { DEPLOYMENTS as RAW } from "./deployments";
 
 export type OrderStruct = { maker: Address; traits: Hex; data: Hex };
 export type Order = { maker: Address; traits: bigint; data: Hex };
@@ -23,10 +23,8 @@ export interface Deployment {
   };
 }
 
-// Add `import sepoliaDeployment from "./deployments/11155111.json"` after deploying to Sepolia.
-const DEPLOYMENTS: Record<number, Deployment> = {
-  31337: local as unknown as Deployment,
-};
+// Every chain the deploy script has written to ./deployments (index.ts is generated).
+const DEPLOYMENTS = RAW as Record<number, Deployment>;
 
 export const CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID || 31337);
 export const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || "http://127.0.0.1:8545";
