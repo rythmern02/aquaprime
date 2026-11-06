@@ -7,6 +7,7 @@ import type { PublicClient } from "viem";
 import { chain } from "@/config";
 import { initialReadMode, makePublicClient, type ReadMode } from "@/lib/clients";
 import { getAnonWorker } from "@/lib/anonRpc";
+import { DemoWalletProvider } from "@/hooks/useDemoWallet";
 
 type EIP1193 = { request(args: { method: string; params?: unknown }): Promise<unknown> };
 
@@ -69,7 +70,7 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <ReadContext.Provider value={{ client, mode, anonStatus, anonError, setMode }}>{children}</ReadContext.Provider>
+        <ReadContext.Provider value={{ client, mode, anonStatus, anonError, setMode }}><DemoWalletProvider>{children}</DemoWalletProvider></ReadContext.Provider>
       </QueryClientProvider>
     </WagmiProvider>
   );

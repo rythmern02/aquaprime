@@ -5,6 +5,7 @@ import { useAccount, useSwitchChain, useWalletClient } from "wagmi";
 import { BaseError, ContractFunctionRevertedError, type Abi, type Address, type Hex } from "viem";
 import { chain } from "@/config";
 import { useReads } from "@/app/providers";
+import { useDemoWallet } from "./useDemoWallet";
 
 export interface LogLine { t: number; level: "info" | "ok" | "err" | "warn"; msg: string; tx?: string }
 
@@ -26,8 +27,12 @@ export function revertReason(e: unknown): string {
 
 /** Wallet-signed write; receipt is awaited through the (Anon-RPC) read client. */
 export function useTx() {
-  const { data: wallet } = useWalletClient();
-  const { chainId, isConnected } = useAccount();
+  const { data: injectedWallet } = useWalletClient();
+  const { chainId: injectedChain, isConnected: injectedConnected } = useAccount();
+  const demo = useDemoWallet();
+  const wallet = demo.active ? demo.wallet : injectedWallet;
+  const isConnected = demo.active || injectedConnected;
+  const chainId = demo.active ? chain.id : injectedChain;
   const { switchChainAsync } = useSwitchChain();
   const { client } = useReads();
   const qc = useQueryClient();
@@ -38,8 +43,8 @@ export function useTx() {
     if (chainId !== chain.id) await switchChainAsync({ chainId: chain.id });
     setPending(label);
     try {
-      const { request } = await client.simulateContract({ ...p, account: wallet.account } as never);
-      const hash = await wallet.writeContract(request as never);
+      const { request } = await client.simulateContract({ ...p, account: wallet!.account } as never);
+      const hash = await wallet!.writeContract(request as never);
       const receipt = await client.waitForTransactionReceipt({ hash });
       if (receipt.status !== "success") throw new Error(`${label} reverted`);
       await qc.invalidateQueries();
@@ -48,5 +53,5 @@ export function useTx() {
       setPending(null);
     }
   }
-  return { send, pending, account: wallet?.account.address };
+  return { send, pending, account: wallet?.account?.address };
 }
