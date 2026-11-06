@@ -16,7 +16,9 @@
     "seed:localhost": "hardhat run scripts/seed-strategies.ts --network localhost",
     "seed:sepolia": "hardhat run scripts/seed-strategies.ts --network sepolia",
     "export-abis": "ts-node --transpile-only scripts/export-abis.ts",
-    "keeper": "ts-node --transpile-only agent/keeper.ts"
+    "keeper": "ts-node --transpile-only agent/keeper.ts",
+    "preflight:sepolia": "hardhat run scripts/preflight-sepolia.ts --network sepolia",
+    "verify:sepolia": "hardhat etherscan-verify --network sepolia"
   },
   "dependencies": {
     "@1inch/aqua": "https://github.com/1inch/aqua#6f05aa1ac2dcf701b0e086ad5e7606515f1fa454",
