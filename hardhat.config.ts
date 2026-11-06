@@ -54,7 +54,8 @@ const config: HardhatUserConfig = {
       "@1inch/swap-vm/src/routers/AquaSwapVMRouter.sol",
       "@1inch/swap-vm/src/routers/SwapVMRouter.sol",
       "@1inch/swap-vm/test/mocks/WETHMock.sol",
-      "@1inch/solidity-utils/contracts/mocks/TokenMock.sol"
+      "@1inch/solidity-utils/contracts/mocks/TokenMock.sol",
+      "@1inch/swap-vm/test/mocks/TokenMockDecimals.sol"
     ]
   },
   typechain: {
