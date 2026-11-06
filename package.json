@@ -18,7 +18,10 @@
     "export-abis": "ts-node --transpile-only scripts/export-abis.ts",
     "keeper": "ts-node --transpile-only agent/keeper.ts",
     "preflight:sepolia": "hardhat run scripts/preflight-sepolia.ts --network sepolia",
-    "verify:sepolia": "hardhat etherscan-verify --network sepolia"
+    "verify:sepolia": "hardhat etherscan-verify --network sepolia",
+    "agentpass:test-idp": "node scripts/e2e-agentpass.mjs idp",
+    "agentpass:e2e": "node scripts/e2e-agentpass.mjs run",
+    "demo:local": "bash scripts/demo-local.sh"
   },
   "dependencies": {
     "@1inch/aqua": "https://github.com/1inch/aqua#6f05aa1ac2dcf701b0e086ad5e7606515f1fa454",
