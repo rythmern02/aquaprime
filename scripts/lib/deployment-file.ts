@@ -6,6 +6,7 @@ import path from "path";
 export interface DeploymentFile {
   chainId: number;
   network: string;
+  deployBlock?: number;
   oracleMode: "operator" | "chainlink";
   contracts: Record<string, string>;
   roles: Record<string, string>;

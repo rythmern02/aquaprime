@@ -63,9 +63,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const router = (await deploy("AquaPrimeRouter", { ...opts, args: [aqua, weth, deployer] })).address;
   const builder = (await deploy("StrategyBuilder", { ...opts, args: [] })).address;
-  const registry = (await deploy("CreditPositionRegistry", {
+  const registryDeploy = await deploy("CreditPositionRegistry", {
     ...opts, args: [aqua, router, builder, weth, usdc, feed, treasury, attester, deployer],
-  })).address;
+  });
+  const registry = registryDeploy.address;
+  const deployBlock = registryDeploy.receipt?.blockNumber
+    ?? (await deployments.get("CreditPositionRegistry")).receipt?.blockNumber ?? 0;
   const executor = (await deploy("LiquidationExecutor", { ...opts, args: [aqua, router, registry, deployer] })).address;
   const aquaAMM = (await deploy("AquaAMM", { ...opts, args: [aqua] })).address;
 
@@ -95,6 +98,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   writeDeployment(chainId, {
     chainId,
     network: network.name,
+    deployBlock,
     contracts: { aqua, weth, usdc, priceFeed: feed, router, builder, registry, executor, aquaAMM },
     roles: { deployer, treasury, attester, keeper },
     oracleMode: isLocal || process.env.ORACLE_MODE === "operator" ? "operator" : "chainlink",
