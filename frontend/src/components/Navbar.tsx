@@ -1,6 +1,6 @@
 "use client";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
-import { injected } from "wagmi/connectors";
+import { injected } from "@wagmi/core";
 import { chain, deployment } from "@/config";
 import { useReads } from "@/app/providers";
 import { short } from "@/lib/format";
