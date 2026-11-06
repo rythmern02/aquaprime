@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { isAddress, parseEther, parseUnits, type Address, type Hex } from "viem";
 import { IDKitRequestWidget, proofOfHuman, type IDKitResult, type RpContext } from "@worldcoin/idkit";
 import { deployment, txUrl, WORLD } from "@/config";
@@ -46,6 +47,11 @@ export function BorrowerPanel({ borrower, setBorrower, log }: { borrower?: Addre
   const [idkitOpen, setIdkitOpen] = useState(false);
   const [rpContext, setRpContext] = useState<RpContext>();
   const [busy, setBusy] = useState<string | null>(null);
+  const idp = useQuery({
+    queryKey: ["agentpass-config"],
+    queryFn: () => fetch("/api/agentpass/config").then((r) => r.json()) as Promise<{ issuer: string; isWorld: boolean; label: string; configured: boolean }>,
+    refetchInterval: false,
+  });
 
   useEffect(() => { if (account && !borrower) setBorrower(account); }, [account, borrower, setBorrower]);
   useEffect(() => { if (market.data?.price) setPrice(Number(market.data.price) / 1e6); }, [market.data?.price]);
@@ -116,7 +122,7 @@ export function BorrowerPanel({ borrower, setBorrower, log }: { borrower?: Addre
   const execute = async (attemptId: string) => {
     const r = await api<{ txHash: string; approvedBy?: { sub?: string; acr?: string } }>("/api/keeper/execute", { attemptId, borrower });
     if (r.ok) {
-      log("ok", `SwapVM fill executed — aqua.pull(USDC from LP) + aqua.push(WETH to LP). Approved by World sub ${short(r.data.approvedBy?.sub, 6)} (${r.data.approvedBy?.acr ?? "acr n/a"})`, r.data.txHash);
+      log("ok", `SwapVM fill executed — aqua.pull(USDC from LP) + aqua.push(WETH to LP). Approved via ${idp.data?.label ?? "IdP"} · sub ${short(r.data.approvedBy?.sub, 6)} (${r.data.approvedBy?.acr ?? "acr n/a"})`, r.data.txHash);
     } else {
       log("err", `HTTP ${r.status} — Action Blocked: ${r.data.error}`);
     }
@@ -250,7 +256,15 @@ export function BorrowerPanel({ borrower, setBorrower, log }: { borrower?: Addre
 
       {/* Step 3 — keeper */}
       <div className="rounded-xl border border-ink-700 p-4">
-        <div className="text-sm font-medium text-white">Step 3 · Keeper agent + World ID Agent Pass</div>
+        <div className="flex items-center justify-between gap-2">
+          <div className="text-sm font-medium text-white">Step 3 · Keeper agent + World ID Agent Pass</div>
+          {idp.data && (
+            <span title={idp.data.issuer}
+              className={`chip ${idp.data.isWorld ? "border-emerald-500/50 text-emerald-300" : "border-amber-500/60 bg-amber-500/10 text-amber-300"}`}>
+              {idp.data.label}{idp.data.configured ? "" : " · not configured"}
+            </span>
+          )}
+        </div>
         <dl className="mt-2 grid grid-cols-2 gap-x-6 text-xs">
           <div className="kv"><dt>Auction</dt><dd>{p?.auctionActive ? "live (0xf0)" : "—"}</dd></div>
           <div className="kv"><dt>Grace left</dt><dd>{graceLeft ? `${graceLeft}s` : "0s"}</dd></div>
