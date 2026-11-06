@@ -100,6 +100,25 @@ Official contracts used: `Aqua.sol` (unmodified, from `@1inch/aqua`), the `SwapV
 
 ---
 
+## Live on Sepolia
+
+All five AquaPrime contracts are source-verified on [Sourcify](https://repo.sourcify.dev/11155111/). They run against 1inch's **official canonical Aqua**.
+
+| Contract | Address |
+|---|---|
+| Aqua (official, canonical) | [`0x1111113ccf1426a8e30e2bff5e005d929bf6a90a`](https://sepolia.etherscan.io/address/0x1111113ccf1426a8e30e2bff5e005d929bf6a90a) |
+| AquaPrimeRouter (0xf0/0xf1) | [`0xbBae5064B9ff7619F63a9F48a68DD488EF41beF0`](https://sepolia.etherscan.io/address/0xbBae5064B9ff7619F63a9F48a68DD488EF41beF0) |
+| CreditPositionRegistry | [`0xa6e4F3558B287F6Fc659F574ffE3e1264ba90876`](https://sepolia.etherscan.io/address/0xa6e4F3558B287F6Fc659F574ffE3e1264ba90876) |
+| LiquidationExecutor | [`0x686b25A0D6780442C9B68486B1221F6c8FDcB649`](https://sepolia.etherscan.io/address/0x686b25A0D6780442C9B68486B1221F6c8FDcB649) |
+| StrategyBuilder | [`0xA4e413911C2dFBD0f08E1A3C7B9C372bB0867305`](https://sepolia.etherscan.io/address/0xA4e413911C2dFBD0f08E1A3C7B9C372bB0867305) |
+| AquaAMM | [`0xfF720b3E996D5991101bd93A096b1C31C1b1BAD8`](https://sepolia.etherscan.io/address/0xfF720b3E996D5991101bd93A096b1C31C1b1BAD8) |
+| Price feed | Chainlink ETH/USD `0x694AA1769357215DE4FAC081bf1f309aDC325306` |
+| Tokens | Circle USDC `0x1c7D…7238`, WETH `0xfFf9…6B14` |
+
+The maker `0x866E…6814` ships 3 strategies from one 20 USDC wallet (3.0x SLAC). A first loan of 5 USDC was
+`aqua.pull()`ed straight from that wallet; the registry holds 0 USDC. Browser reads go through Anon-RPC on the **Nox mixnet**
+(verified in Chrome: "Private Read Mode: ON").
+
 ## Run it
 
 Requirements: Node 20+, a browser wallet (MetaMask etc.).
@@ -170,6 +189,28 @@ npm run deploy:sepolia && npm run verify:sepolia && npm run seed:sepolia
    stress-test feed instead of Chainlink if you need to demo a crash on Sepolia.
 
 ---
+
+## Production deployment
+
+Single-node Docker deployment (web/API + keeper agent):
+
+```bash
+cp frontend/.env.example frontend/.env.production   # fill World + keeper secrets
+```
+```bash
+docker compose up -d --build
+```
+```bash
+curl -s localhost:3000/api/health
+```
+
+* `/api/health` is a readiness probe: chain, oracle freshness, attester ↔ registry match, keeper gas + operator
+  rights, seeded strategies, and which integrations are configured. It never returns secrets.
+* Gas-spending and World-facing endpoints are rate-limited per client (set `TRUST_PROXY=true` behind your reverse proxy).
+* The Agent Pass approval store lives on the `approvals` volume, so approvals survive restarts. Move it to Postgres/Redis before
+  running more than one web instance.
+* The keeper agent scans `Borrowed` logs from the deployment block in 5k-block chunks (works on public RPCs).
+* The images run as non-root and contain no secrets. `NEXT_PUBLIC_*` values are inlined at build time.
 
 ## World ID integration
 
