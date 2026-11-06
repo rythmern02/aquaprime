@@ -2,32 +2,37 @@
 
 _Status: active_
 
-**Concept — "Bioluminescent Abyss."** Capital is a living liquid. It glows, moves and works, but never leaves
-its vessel (the user's wallet). Everything on screen either *flows* (liquidity, quotes, keepers) or *holds*
-(custody, collateral, humans).
+**Concept — "Graphite / Signal."** A precise financial instrument, not a crypto toy. The page reads like an
+engineering drawing: warm near-black paper, bone ink, hairline rules, and exactly one colour that means
+*look here*. Everything else is typography and spacing.
 
 ## Palette (dark only)
 | Token | Hex | Use |
 |---|---|---|
-| `abyss` | `#03050A` | page background |
-| `deep` | `#070B14` | raised surfaces |
-| `trench` | `#0C1322` | cards |
-| `line` | `#1A2438` | hairlines |
-| `tide` (primary) | `#5CF2E6` | liquidity, primary actions, healthy |
-| `pulse` (secondary) | `#8B5CFF` | SwapVM / custom opcodes, World ID |
-| `bloom` (accent) | `#C8FF5A` | verified human, success |
-| `ember` (danger) | `#FF4D6D` | insolvency, denied |
-| `amber` (warning) | `#FFB547` | grace window, test-mode labels |
-| text | `#E8EEF8` / muted `#93A1B8` | body copy (AA on `abyss`) |
+| `bg` | `#0B0B0A` | page |
+| `panel` | `#111110` | framed surfaces |
+| `raised` | `#191917` | hover / active rows |
+| `rule` / `rule-2` | `#24231F` / `#34332E` | hairlines, input borders |
+| `fg` | `#EDEBE5` | primary text, primary buttons, healthy values |
+| `fg-2` / `fg-3` / `fg-4` | `#BDB9B0` / `#8C887F` / `#66635C` | body / secondary / labels only |
+| `signal` | `#FF5B24` | the one accent: live dots, opcode 0xf0, insolvency, the sold slice |
+| `ok` | `#55C48C` | done, approved, verified |
+| `warn` | `#E3A63C` | grace window, near-liquidation |
+
+Rules: no gradient text, no glows, no glassmorphism. `signal` appears at most a few times per screen.
 
 ## Type
-- Display: **Unbounded** (wide, confident, Gen-Z) — headlines only.
-- UI: **Inter**.
-- Numbers / bytecode: **JetBrains Mono** with tabular figures.
+- **Instrument Sans** (400/500/600): UI and headlines, tracking −0.035em on display sizes.
+- **Instrument Serif italic**: one emphasis word per headline at most ("*never* leaves").
+- **IBM Plex Mono**: every number (tabular), labels in 11px uppercase with +0.08em tracking.
+
+## Shape and layout
+- Radii 2–8 px. Buttons are 6 px rectangles; primary = bone fill, black text.
+- 12-column editorial grid; each section opens with a hairline and an index (`01 / Mechanism`).
+- Panels are split by 1 px gaps on a `rule` background rather than separate cards.
 
 ## Motion
-Liquid easing `cubic-bezier(.22,1,.36,1)`; 150–250 ms for UI, 600–900 ms for reveals. Every ambient
-animation (shader, orb, marquee) stops under `prefers-reduced-motion`.
+Short fades (≤ 600 ms, ease `(.2,.8,.2,1)`), no blur-ins or bounces. All motion off under `prefers-reduced-motion`.
 
 ## Voice
-Short, confident, concrete numbers. "Your capital never leaves." not "We enable non-custodial liquidity."
+Plain and specific. Short sentences. Numbers over adjectives.

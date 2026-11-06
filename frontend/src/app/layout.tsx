@@ -1,12 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono, Unbounded } from "next/font/google";
+import { IBM_Plex_Mono, Instrument_Sans, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
 // next/font self-hosts at build time: no runtime requests to Google, no trackers.
-const sans = Inter({ subsets: ["latin"], variable: "--font-sans" });
-const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
-const display = Unbounded({ subsets: ["latin"], variable: "--font-display", weight: ["500", "600", "700"] });
+const sans = Instrument_Sans({ subsets: ["latin"], variable: "--font-sans", weight: ["400", "500", "600"] });
+const serif = Instrument_Serif({ subsets: ["latin"], variable: "--font-serif", weight: "400", style: ["normal", "italic"] });
+const mono = IBM_Plex_Mono({ subsets: ["latin"], variable: "--font-mono", weight: ["400", "500"] });
 
 export const metadata: Metadata = {
   title: "AquaPrime — capital that never leaves",
@@ -14,11 +14,11 @@ export const metadata: Metadata = {
   referrer: "no-referrer",
 };
 
-export const viewport: Viewport = { themeColor: "#03050A" };
+export const viewport: Viewport = { themeColor: "#0B0B0A" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${sans.variable} ${mono.variable} ${display.variable}`}>
+    <html lang="en" className={`${sans.variable} ${serif.variable} ${mono.variable}`}>
       <body className="grain font-sans antialiased">
         <Providers>{children}</Providers>
       </body>

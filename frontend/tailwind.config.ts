@@ -1,45 +1,35 @@
 import type { Config } from "tailwindcss";
 
+/**
+ * "Graphite / Signal" — see ../brand.md.
+ * Warm near-black surfaces, bone text, one signal colour that means "look here".
+ */
 export default {
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
       fontFamily: {
         sans: ["var(--font-sans)", "ui-sans-serif", "system-ui"],
-        display: ["var(--font-display)", "var(--font-sans)", "ui-sans-serif"],
+        display: ["var(--font-sans)", "ui-sans-serif", "system-ui"],
+        serif: ["var(--font-serif)", "ui-serif", "Georgia"],
         mono: ["var(--font-mono)", "ui-monospace", "SFMono-Regular"],
       },
       colors: {
-        abyss: "#03050A",
-        deep: "#070B14",
-        trench: "#0C1322",
-        line: "#1A2438",
-        tide: { DEFAULT: "#5CF2E6", 300: "#9DF8F0", 400: "#5CF2E6", 500: "#22D8CB", 600: "#12A79D" },
-        pulse: { DEFAULT: "#8B5CFF", 300: "#B79CFF", 400: "#8B5CFF", 500: "#6E3BFF" },
-        bloom: { DEFAULT: "#C8FF5A", 400: "#C8FF5A", 500: "#A6E62E" },
-        ember: { DEFAULT: "#FF4D6D", 400: "#FF4D6D", 500: "#E8294D" },
-        amber: { DEFAULT: "#FFB547", 400: "#FFB547" },
-        ink: { 50: "#E8EEF8", 300: "#B6C2D6", 400: "#93A1B8", 500: "#6B7890", 600: "#4A5568" },
-        // legacy aliases used by older components
-        aqua: { 300: "#9DF8F0", 400: "#5CF2E6", 500: "#22D8CB", 600: "#12A79D" },
-        prime: { 400: "#B79CFF", 500: "#8B5CFF" },
+        bg: "#0B0B0A",
+        panel: "#111110",
+        raised: "#191917",
+        rule: { DEFAULT: "#24231F", 2: "#34332E" },
+        fg: { DEFAULT: "#EDEBE5", 2: "#BDB9B0", 3: "#8C887F", 4: "#66635C" },
+        signal: { DEFAULT: "#FF5B24", soft: "#FF8A5F" },
+        ok: "#55C48C",
+        warn: "#E3A63C",
       },
-      boxShadow: {
-        glow: "0 0 60px -12px rgba(92,242,230,.55)",
-        "glow-pulse": "0 0 60px -12px rgba(139,92,255,.6)",
-        "glow-ember": "0 0 50px -12px rgba(255,77,109,.6)",
-      },
-      transitionTimingFunction: { liquid: "cubic-bezier(.22,1,.36,1)" },
+      borderRadius: { sm: "2px", DEFAULT: "4px", md: "6px", lg: "8px", xl: "10px" },
+      transitionTimingFunction: { out: "cubic-bezier(.2,.8,.2,1)" },
       keyframes: {
-        marquee: { from: { transform: "translateX(0)" }, to: { transform: "translateX(-50%)" } },
-        shimmer: { from: { backgroundPosition: "200% 0" }, to: { backgroundPosition: "-200% 0" } },
-        floaty: { "0%,100%": { transform: "translateY(0)" }, "50%": { transform: "translateY(-6px)" } },
+        blink: { "0%,100%": { opacity: "1" }, "50%": { opacity: ".25" } },
       },
-      animation: {
-        marquee: "marquee 40s linear infinite",
-        shimmer: "shimmer 2.2s linear infinite",
-        floaty: "floaty 6s ease-in-out infinite",
-      },
+      animation: { blink: "blink 1.6s steps(2,start) infinite" },
     },
   },
   plugins: [],
