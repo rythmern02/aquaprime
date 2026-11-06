@@ -1,0 +1,9 @@
+# AquaPrime deterministic keeper agent
+FROM node:20-alpine
+WORKDIR /app
+RUN npm i -g ts-node@10.9.2 typescript@5.9.3 && npm init -y >/dev/null && npm i ethers@6.15.0 dotenv@16.4.5 @types/node@24.7.2
+COPY agent ./agent
+COPY frontend/src/config/deployments ./frontend/src/config/deployments
+RUN adduser -S keeper
+USER keeper
+CMD ["ts-node", "--transpile-only", "agent/keeper.ts"]

@@ -36,15 +36,19 @@ async function main() {
   const registry = new ethers.Contract(dep.contracts.registry, REGISTRY_ABI, wallet);
   const borrowers = new Set<string>();
   const proposed = new Map<string, number>();
-  let fromBlock = 0;
+  let fromBlock = Number(dep.deployBlock ?? 0);
+  const CHUNK = Number(process.env.KEEPER_LOG_CHUNK || 5000);
 
   console.log(`[keeper] chain ${chainId} registry ${dep.contracts.registry} as ${wallet.address}`);
   for (;;) {
     try {
       const head = await provider.getBlockNumber();
-      for (const ev of await registry.queryFilter(registry.filters.Borrowed(), fromBlock, head))
-        borrowers.add((ev as ethers.EventLog).args.borrower);
-      fromBlock = head + 1;
+      while (fromBlock <= head) {
+        const to = Math.min(fromBlock + CHUNK - 1, head);
+        for (const ev of await registry.queryFilter(registry.filters.Borrowed(), fromBlock, to))
+          borrowers.add((ev as ethers.EventLog).args.borrower);
+        fromBlock = to + 1;
+      }
       const now = BigInt((await provider.getBlock("latest"))!.timestamp);
 
       for (const b of borrowers) {
