@@ -2,7 +2,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider, createConfig, custom } from "wagmi";
-import { injected } from "wagmi/connectors";
+import { injected } from "@wagmi/core";
 import type { PublicClient } from "viem";
 import { chain } from "@/config";
 import { initialReadMode, makePublicClient, type ReadMode } from "@/lib/clients";
