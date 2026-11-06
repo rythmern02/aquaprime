@@ -6,6 +6,8 @@ import { registryAbi } from "@/abi/generated";
 import { errorResponse, HttpError, requireEnv } from "@/server/env";
 import { serverPublicClient } from "@/server/chain";
 
+import { rateLimit } from "@/server/ratelimit";
+
 export const dynamic = "force-dynamic";
 
 const VERIFY_BASE: Record<string, string> = {
@@ -25,6 +27,7 @@ type ResponseItem = { identifier: string; signal_hash?: string; nullifier?: stri
  */
 export async function POST(req: Request) {
   try {
+    rateLimit(req, "world-verify", 10, 60000);
     const { wallet, result } = (await req.json()) as {
       wallet?: string;
       result?: { protocol_version?: string; action?: string; environment?: string; responses?: ResponseItem[] };
