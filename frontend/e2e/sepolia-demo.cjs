@@ -10,6 +10,9 @@ const BASE = process.env.BASE || "http://localhost:3005";
   const chrome = process.env.CHROME_PATH || "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
   const b = await chromium.launch({ executablePath: chrome, headless: true });
   const ctx = await b.newContext({ viewport: { width: 1440, height: 1000 } });
+  // This test covers the demo/keeper/IdP flow on Sepolia. Browser reads use the explicit "direct RPC" opt-out by
+  // default because the public Nox testnet mixnet can be degraded; READS=anon forces mixnet reads instead.
+  if (process.env.READS !== "anon") await ctx.addInitScript(() => localStorage.setItem("aquaprime.readMode", "direct-optout"));
   const p = await ctx.newPage();
   globalThis.__page = p;
   const errors = []; p.on("pageerror", (e) => errors.push(e.message));
@@ -24,7 +27,7 @@ const BASE = process.env.BASE || "http://localhost:3005";
   await p.getByRole("heading", { name: "Crash ETH" }).waitFor({ timeout: 240000 });
   const steps = await p.locator("ol[aria-live=polite] li").allTextContents().catch(() => []);
   console.log(`  [${ts()}] session ready`);
-  const hf0 = await waitHf(/1\.(0[89]|1[0-3])/, 180000);
+  const hf0 = await waitHf(/1\.(0[89]|1[0-3])/, 300000);
   assert(true, `demo position reset on Sepolia (${hf0})`);
 
   // crash below the liquidation price
