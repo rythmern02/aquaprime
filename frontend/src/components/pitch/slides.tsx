@@ -360,7 +360,7 @@ function Team() {
               <div className="h-display text-[48px] leading-none">Rythme Nagrani</div>
               <div className="mt-3 text-[22px] text-ocean-deep">Co-Founder, Web3Spell Labs</div>
               <p className="mt-5 text-[17px] leading-relaxed text-fg-2">Designed and shipped AquaPrime: the Aqua credit engine, the SwapVM opcodes, the keeper agent, the World ID and Anon-RPC integrations, and this app.</p>
-              <a href="https://github.com/rythmern02/treaz" className="mt-5 inline-flex items-center gap-2 font-mono text-[15px] text-fg-2 underline decoration-rule-2 underline-offset-4"><Github className="h-4 w-4" aria-hidden /> github.com/rythmern02/treaz</a>
+              <a href="https://github.com/rythmern02/aquaprime" className="mt-5 inline-flex items-center gap-2 font-mono text-[15px] text-fg-2 underline decoration-rule-2 underline-offset-4"><Github className="h-4 w-4" aria-hidden /> github.com/rythmern02/aquaprime</a>
             </div>
           </div>
           <div className="rise flex flex-col gap-5" style={{ animationDelay: ".16s" }}>

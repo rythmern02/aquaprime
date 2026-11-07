@@ -260,7 +260,7 @@ export function Footer() {
         <ul className="flex flex-wrap content-start gap-x-6 gap-y-2 md:col-span-7 md:justify-end">
           <li>No trackers</li>
           <li>MIT</li>
-          <li><a href="https://github.com/rythmern02/treaz" target="_blank" rel="noreferrer" className="focus-ring inline-flex items-center gap-1 rounded underline decoration-white/30 underline-offset-4 hover:text-white">Source <ArrowUpRight className="h-3 w-3" aria-hidden /></a></li>
+          <li><a href="https://github.com/rythmern02/aquaprime" target="_blank" rel="noreferrer" className="focus-ring inline-flex items-center gap-1 rounded underline decoration-white/30 underline-offset-4 hover:text-white">Source <ArrowUpRight className="h-3 w-3" aria-hidden /></a></li>
           <li>ETHGlobal Mumbai 2026</li>
         </ul>
       </div>

@@ -20,7 +20,7 @@ go into Vercel's env:
 
 ## 2. Import the project
 
-1. vercel.com → **Add New → Project** → import `rythmern02/treaz`.
+1. vercel.com → **Add New → Project** → import `rythmern02/aquaprime`.
 2. **Root Directory: `frontend`**. Framework preset: Next.js (from `frontend/vercel.json`, which also gives every API
    route a 60 s limit — keeper/oracle routes wait for a Sepolia confirmation).
 3. Do **not** set `NEXT_DIST_DIR` (it is only for running a dev server beside a local build).
