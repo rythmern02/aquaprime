@@ -75,7 +75,7 @@ export function SiteNav() {
     on(); window.addEventListener("scroll", on, { passive: true });
     return () => window.removeEventListener("scroll", on);
   }, []);
-  const links = path === "/" ? [["#how", "Mechanism"], ["#simulator", "Simulator"], ["#live", "Live"], ["#stack", "Stack"]] : [["/", "Overview"]];
+  const links = path === "/" ? [["#how", "Mechanism"], ["#simulator", "Simulator"], ["#live", "Live"], ["#stack", "Stack"], ["/pitch", "Pitch"]] : [["/", "Overview"]];
   return (
     <header className={`fixed inset-x-0 top-0 z-40 border-b transition-colors duration-200 ${scrolled ? "border-rule bg-bg/85 backdrop-blur-md" : "border-transparent"}`}>
       <nav aria-label="Main" className="wrap flex h-14 items-center justify-between gap-4">
