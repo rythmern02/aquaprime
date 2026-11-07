@@ -73,9 +73,9 @@ describe("rate limiter", () => {
   it("allows `limit` calls per window per client, then 429s", async () => {
     const { rateLimit } = await import("@/server/ratelimit");
     const req = new Request("http://x/", { headers: { "x-real-ip": "1.2.3.4" } });
-    for (let i = 0; i < 3; i++) rateLimit(req, "t", 3, 60_000);
-    expect(() => rateLimit(req, "t", 3, 60_000)).toThrowError(/Too many requests/);
+    for (let i = 0; i < 3; i++) await rateLimit(req, "t", 3, 60_000);
+    await expect(rateLimit(req, "t", 3, 60_000)).rejects.toThrowError(/Too many requests/);
     // another client is unaffected
-    expect(() => rateLimit(new Request("http://x/", { headers: { "x-real-ip": "5.6.7.8" } }), "t", 3, 60_000)).not.toThrow();
+    await expect(rateLimit(new Request("http://x/", { headers: { "x-real-ip": "5.6.7.8" } }), "t", 3, 60_000)).resolves.toBeUndefined();
   });
 });

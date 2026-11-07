@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 /** Permissionless housekeeping (anyone can call registry.startAuction when HF < 1). */
 export async function POST(req: Request) {
   try {
-    rateLimit(req, "start-auction", 10, 60000);
+    await rateLimit(req, "start-auction", 10, 60000);
     const { borrower } = (await req.json()) as { borrower?: string };
     if (!borrower || !isAddress(borrower)) throw new HttpError(400, "Invalid borrower", "bad_request");
     const txHash = await startAuction(borrower as Address);

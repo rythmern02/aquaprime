@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
  */
 export async function POST(req: Request) {
   try {
-    rateLimit(req, "oracle", 20, 60000);
+    await rateLimit(req, "oracle", 20, 60000);
     if (process.env.ENABLE_OPERATOR_ORACLE !== "true" || deployment.oracleMode !== "operator")
       throw new HttpError(403, "Operator oracle disabled for this deployment (Chainlink-backed)", "disabled");
     const { price } = (await req.json()) as { price?: number };

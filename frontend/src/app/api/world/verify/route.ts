@@ -25,7 +25,7 @@ type ResponseItem = { identifier: string; signal_hash?: string; nullifier?: stri
  */
 export async function POST(req: Request) {
   try {
-    rateLimit(req, "world-verify", 10, 60000);
+    await rateLimit(req, "world-verify", 10, 60000);
     const { wallet, result } = (await req.json()) as {
       wallet?: string;
       result?: { protocol_version?: string; action?: string; environment?: string; responses?: ResponseItem[] };

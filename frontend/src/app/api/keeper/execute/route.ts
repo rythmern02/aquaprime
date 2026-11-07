@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
  */
 export async function POST(req: Request) {
   try {
-    rateLimit(req, "keeper-execute", 20, 60000);
+    await rateLimit(req, "keeper-execute", 20, 60000);
     const { attemptId, borrower } = (await req.json()) as { attemptId?: string; borrower?: string };
     if (!attemptId) throw new HttpError(403, "Human authorization denied: no Agent Pass approval presented", "missing_approval");
     if (!borrower || !isAddress(borrower)) throw new HttpError(400, "Invalid borrower", "bad_request");
