@@ -2,11 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: dark; }
+:root { color-scheme: light; }
 html { scroll-behavior: smooth; }
-html, body { background: #0B0B0A; color: #EDEBE5; }
+html, body { background: #F4F9FE; color: #06223D; }
 body { font-feature-settings: "ss01", "cv11"; }
-::selection { background: #FF5B24; color: #0B0B0A; }
+::selection { background: #1FC2E3; color: #06223D; }
 
 /* numbers are always tabular mono */
 .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
@@ -22,34 +22,36 @@ body { font-feature-settings: "ss01", "cv11"; }
   .label { @apply font-mono text-[11px] uppercase tracking-[0.08em] text-fg-3; }
   .h-display { @apply font-display font-medium tracking-[-0.035em] text-fg; }
   .serif { @apply font-serif font-normal italic tracking-[-0.01em]; }
-  .focus-ring { @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 focus-visible:ring-offset-2 focus-visible:ring-offset-bg; }
+  .focus-ring { @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean focus-visible:ring-offset-2 focus-visible:ring-offset-bg; }
 
-  .btn { @apply focus-ring inline-flex min-h-[40px] items-center justify-center gap-2 rounded-md px-4 text-sm font-medium transition-colors duration-150 disabled:pointer-events-none disabled:opacity-35; }
-  .btn-primary { @apply btn bg-fg text-bg hover:bg-white; }
-  .btn-signal { @apply btn bg-signal text-bg hover:bg-signal-soft; }
-  .btn-ghost { @apply btn border border-rule-2 text-fg hover:border-fg-4 hover:bg-raised; }
+  .btn { @apply focus-ring inline-flex min-h-[40px] items-center justify-center gap-2 rounded-full px-5 text-sm font-medium transition duration-200 ease-out active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40; }
+  .btn-primary { @apply btn bg-fg text-white hover:bg-ocean-deep; }
+  .btn-ocean { @apply btn bg-ocean text-white shadow-float hover:bg-ocean-deep; }
+  .btn-signal { @apply btn bg-signal text-white hover:bg-signal-soft; }
+  .btn-ghost { @apply btn border border-rule-2 bg-white/70 text-fg backdrop-blur hover:border-ocean/50 hover:bg-white; }
   .btn-quiet { @apply btn px-2 text-fg-2 hover:text-fg; }
 
-  .input { @apply focus-ring h-11 w-full rounded-md border border-rule-2 bg-bg px-3 font-mono text-sm text-fg placeholder:text-fg-4 transition-colors hover:border-fg-4 focus:border-fg-3; }
-  .tag { @apply inline-flex h-6 items-center gap-1.5 rounded-sm border border-rule-2 px-2 font-mono text-[10.5px] uppercase tracking-[0.06em] text-fg-2; }
+  .input { @apply focus-ring h-11 w-full rounded-md border border-rule-2 bg-white px-3 font-mono text-sm text-fg placeholder:text-fg-4 transition-colors hover:border-fg-4 focus:border-ocean; }
+  .tag { @apply inline-flex h-6 items-center gap-1.5 rounded-full border border-rule-2 bg-white px-2.5 font-mono text-[10.5px] uppercase tracking-[0.06em] text-fg-2; }
   .kv { @apply flex items-baseline justify-between gap-3 border-t border-rule py-2.5 text-sm first:border-t-0; }
   .kv dt { @apply text-fg-3; }
   .kv dd { @apply num text-fg; }
-  .link { @apply underline decoration-fg-4 underline-offset-[3px] transition-colors hover:text-fg hover:decoration-fg; }
+  .link { @apply underline decoration-rule-2 underline-offset-[3px] transition-colors hover:text-ocean hover:decoration-ocean; }
+  .card { @apply rounded-xl border border-white bg-white/80 shadow-float backdrop-blur-md; }
 }
 
-/* blueprint grid used behind the hero */
 .grid-bg {
   background-image:
-    linear-gradient(to right, rgba(237, 235, 229, 0.045) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(237, 235, 229, 0.045) 1px, transparent 1px);
+    linear-gradient(to right, rgba(6, 34, 61, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(6, 34, 61, 0.05) 1px, transparent 1px);
   background-size: 64px 64px;
-  mask-image: radial-gradient(ellipse 80% 70% at 60% 40%, #000 30%, transparent 75%);
 }
 
 .hatch { background-image: repeating-linear-gradient(135deg, currentColor 0 1px, transparent 1px 4px); }
 
-.grain::after {
-  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 60; opacity: 0.03;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+/* sky used behind the 3D ocean and as its no-WebGL fallback */
+.sky {
+  background:
+    radial-gradient(60% 50% at 78% 18%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 60%),
+    linear-gradient(180deg, #7EC8F8 0%, #B4E0FC 34%, #E3F4FF 56%, #F4F9FE 100%);
 }

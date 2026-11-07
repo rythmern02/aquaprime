@@ -16,7 +16,7 @@ export async function GET(req: Request) {
   const data = JSON.stringify({ type: "aquaprime-agentpass", ...payload }).replace(/</g, "\\u003c");
   const origin = JSON.stringify(url.origin);
   const html = `<!doctype html><meta charset="utf-8"><title>AquaPrime · Agent Pass</title>
-<body style="background:#05080d;color:#cbd5e1;font:14px system-ui;display:grid;place-items:center;height:100vh">
+<body style="background:linear-gradient(#B4E0FC,#F4F9FE);color:#06223D;font:15px system-ui;display:grid;place-items:center;height:100vh;margin:0">
 <p>${payload.status === "approved" ? "Human approval recorded. You can close this window." : "Approval not granted. You can close this window."}</p>
 <script>
   const msg = ${data};

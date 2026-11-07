@@ -14,12 +14,12 @@ export const metadata: Metadata = {
   referrer: "no-referrer",
 };
 
-export const viewport: Viewport = { themeColor: "#0B0B0A" };
+export const viewport: Viewport = { themeColor: "#7EC8F8" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${sans.variable} ${serif.variable} ${mono.variable}`}>
-      <body className="grain font-sans antialiased">
+      <body className="font-sans antialiased">
         <Providers>{children}</Providers>
       </body>
     </html>

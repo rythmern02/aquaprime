@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import type { LogLine } from "@/hooks/useTx";
 import { txUrl } from "@/config";
+import { C } from "@/lib/theme";
 import { eth, hf as fmtHf, short, usd } from "@/lib/format";
 
 const ease = [0.2, 0.8, 0.2, 1] as const;
@@ -9,15 +10,15 @@ const ease = [0.2, 0.8, 0.2, 1] as const;
 export function HealthRing({ value, size = 168 }: { value?: bigint; size?: number }) {
   const v = value === undefined ? undefined : value > 10n ** 30n ? Infinity : Number(value) / 1e18;
   const shown = v === undefined ? 0 : v === Infinity ? 2 : Math.min(v, 2);
-  const tone = v === undefined ? "#66635C" : v < 1 ? "#FF5B24" : v < 1.1 ? "#E3A63C" : "#EDEBE5";
+  const tone = v === undefined ? C.fg4 : v < 1 ? C.signal : v < 1.1 ? C.warn : C.ocean;
   const r = 70, len = 2 * Math.PI * r;
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <svg viewBox="0 0 160 160" className="h-full w-full -rotate-90" role="img" aria-label={`Health factor ${v === undefined ? "unknown" : fmtHf(value)}`}>
-        <circle cx="80" cy="80" r={r} fill="none" stroke="#24231F" strokeWidth="4" />
-        <motion.circle cx="80" cy="80" r={r} fill="none" stroke={tone} strokeWidth="4" strokeLinecap="butt"
+        <circle cx="80" cy="80" r={r} fill="none" stroke={C.rule} strokeWidth="6" />
+        <motion.circle cx="80" cy="80" r={r} fill="none" stroke={tone} strokeWidth="6" strokeLinecap="round"
           strokeDasharray={len} initial={false} animate={{ strokeDashoffset: len * (1 - shown / 2) }} transition={{ duration: 0.8, ease }} />
-        <line x1="80" y1="2" x2="80" y2="18" stroke="#FF5B24" strokeWidth="1" transform="rotate(180 80 80)" />
+        <line x1="80" y1="2" x2="80" y2="18" stroke={C.signal} strokeWidth="1.5" transform="rotate(180 80 80)" />
       </svg>
       <div className="absolute inset-0 grid place-items-center text-center">
         <div>

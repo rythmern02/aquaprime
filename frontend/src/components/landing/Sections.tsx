@@ -7,6 +7,7 @@ import { useNetwork, type FeedItem } from "@/hooks/useNetwork";
 import { deployment, txUrl, CHAIN_ID } from "@/config";
 import { fmt, short } from "@/lib/format";
 import { Mark, reveal, SectionHead } from "./ui";
+import { Waves } from "@/components/fx/Waves";
 
 /* ───────────────────────────── 03 · VM pipeline ───────────────────────────── */
 
@@ -37,23 +38,23 @@ export function VmPipeline() {
       <SectionHead index="03" kicker="Inside the VM" title={<>The rule lives <span className="serif">in the bytecode.</span></>}>
         Not in a keeper&apos;s goodwill, not in an off-chain bot. One custom SwapVM instruction, enforced on every fill.
       </SectionHead>
-      <div className="mt-14 grid overflow-hidden rounded-lg border border-rule lg:grid-cols-12">
+      <div className="card mt-14 grid overflow-hidden lg:grid-cols-12">
         <ol className="lg:col-span-6" aria-label="SwapVM program steps">
           {STEPS.map((st, k) => (
             <li key={st.name} className={k ? "border-t border-rule" : ""}>
               <button onClick={() => { setI(k); setAuto(false); }} aria-current={k === i}
-                className={`focus-ring relative grid w-full grid-cols-[64px_1fr] items-center gap-4 px-5 py-5 text-left transition-colors ${k === i ? "bg-raised" : "hover:bg-panel"}`}>
-                {k === i && <motion.span layoutId="vm-bar" className="absolute inset-y-0 left-0 w-[2px] bg-signal" />}
-                <span className={`num text-sm ${st.op === "0xf0" ? "text-signal" : "text-fg-3"}`}>{st.op}</span>
+                className={`focus-ring relative grid w-full grid-cols-[64px_1fr] items-center gap-4 px-5 py-5 text-left transition-colors ${k === i ? "bg-raised" : "hover:bg-raised/50"}`}>
+                {k === i && <motion.span layoutId="vm-bar" className="absolute inset-y-0 left-0 w-[3px] bg-ocean" />}
+                <span className={`num text-sm ${st.op === "0xf0" ? "text-ocean" : "text-fg-3"}`}>{st.op}</span>
                 <span className="min-w-0">
-                  <span className={`block font-medium ${k === i ? "text-fg" : "text-fg-2"}`}>{st.name}{st.op === "0xf0" && <span className="tag ml-2 border-signal/40 text-signal">custom</span>}</span>
+                  <span className={`block font-medium ${k === i ? "text-fg" : "text-fg-2"}`}>{st.name}{st.op === "0xf0" && <span className="tag ml-2 border-ocean/40 text-ocean">custom</span>}</span>
                   <span className="mt-1 block truncate font-mono text-[11px] text-fg-4">{st.bytes}</span>
                 </span>
               </button>
             </li>
           ))}
         </ol>
-        <div className="flex flex-col gap-6 border-t border-rule bg-panel p-6 sm:p-8 lg:col-span-6 lg:border-l lg:border-t-0">
+        <div className="flex flex-col gap-6 border-t border-rule bg-white p-6 sm:p-8 lg:col-span-6 lg:border-l lg:border-t-0">
           <AnimatePresence mode="wait">
             <motion.p key={i} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
               className="min-h-[72px] text-[15px] leading-relaxed text-fg-2">{s.desc}</motion.p>
@@ -66,7 +67,7 @@ export function VmPipeline() {
                 return (
                   <tr key={k} className="border-t border-rule">
                     <th scope="row" className="py-3 text-left font-mono text-[13px] font-normal text-fg-3">{k}</th>
-                    <td className={`num py-3 text-right transition-colors duration-300 ${hot ? "text-signal" : "text-fg"}`}>{v}</td>
+                    <td className={`num py-3 text-right transition-colors duration-300 ${hot ? "text-ocean" : "text-fg"}`}>{v}</td>
                   </tr>
                 );
               })}
@@ -102,7 +103,7 @@ export function LiveNetwork() {
   const tiles: [string, string | undefined, string?][] = [
     ["Maker wallet, real", data && `$${fmt(data.walletUsdc, 6, 0)}`],
     ["Virtual liquidity", data && `$${fmt(data.virtualUsdc, 6, 0)}`],
-    ["Capital efficiency", data && `${data.slac.toFixed(2)}×`, "text-signal"],
+    ["Capital efficiency", data && `${data.slac.toFixed(2)}×`, "text-ocean"],
     ["Interest revenue", data && `$${fmt(data.revenue.interest, 6, 2)}`],
   ];
   const addr = (a: string) => txUrl("")?.replace("/tx/", "/address/") + a;
@@ -110,27 +111,27 @@ export function LiveNetwork() {
     <section className="wrap py-28">
       <SectionHead id="live" index="04" kicker={CHAIN_ID === 31337 ? "Live · local chain" : "Live · Sepolia via Anon-RPC"}
         title={<>Not a mockup. <span className="text-fg-3">The chain, right now.</span></>} />
-      <div className="mt-14 grid gap-px overflow-hidden rounded-lg border border-rule bg-rule lg:grid-cols-12">
+      <div className="mt-14 grid gap-px overflow-hidden rounded-xl border border-rule bg-rule shadow-float lg:grid-cols-12">
         <div className="grid grid-cols-2 gap-px bg-rule lg:col-span-5">
           {tiles.map(([k, v, tone]) => (
-            <div key={k} className="flex flex-col justify-between gap-6 bg-bg p-6">
+            <div key={k} className="flex flex-col justify-between gap-6 bg-white p-6">
               <div className="label">{k}</div>
               {v === undefined
                 ? <div className="h-8 w-24 animate-pulse rounded-sm bg-raised" />
                 : <div className={`num text-[28px] leading-none ${tone ?? "text-fg"}`}>{v}</div>}
             </div>
           ))}
-          <div className="col-span-2 flex flex-wrap gap-x-6 gap-y-2 bg-bg p-6 font-mono text-[11px] text-fg-3">
+          <div className="col-span-2 flex flex-wrap gap-x-6 gap-y-2 bg-white p-6 font-mono text-[11px] text-fg-3">
             {([["Registry", deployment.contracts.registry], ["Router", deployment.contracts.router], ["Aqua", deployment.contracts.aqua]] as const).map(([k, a]) => (
               <span key={k}>{k} {txUrl("") ? <a className="link text-fg-2" href={addr(a)} target="_blank" rel="noreferrer">{short(a, 4)}</a> : <span className="text-fg-2">{short(a, 4)}</span>}</span>
             ))}
             <span className="ml-auto">block <span className="text-fg-2">#{data?.block.toString() ?? "…"}</span></span>
           </div>
         </div>
-        <div className="bg-bg lg:col-span-7">
+        <div className="bg-white lg:col-span-7">
           <div className="flex items-center justify-between border-b border-rule px-6 py-4">
             <span className="label">Ledger</span>
-            <span className="label flex items-center gap-2"><span className="h-1.5 w-1.5 animate-blink rounded-full bg-signal" aria-hidden />Streaming</span>
+            <span className="label flex items-center gap-2"><span className="h-1.5 w-1.5 animate-blink rounded-full bg-ocean" aria-hidden />Streaming</span>
           </div>
           {isError && <div className="p-6 text-sm text-signal">Couldn&apos;t read events. <button className="link" onClick={() => refetch()}>Retry</button></div>}
           {isLoading && <div className="space-y-px p-6">{[0, 1, 2, 3].map((k) => <div key={k} className="h-10 animate-pulse bg-panel" />)}</div>}
@@ -165,11 +166,11 @@ export function KeeperStory() {
   return (
     <section className="wrap py-28">
       <SectionHead index="05" kicker="Agents" title={<>Autonomous, <span className="serif">not unaccountable.</span></>} />
-      <ol className="mt-14 grid gap-px overflow-hidden rounded-lg border border-rule bg-rule sm:grid-cols-2 lg:grid-cols-4">
+      <ol className="mt-14 grid gap-px overflow-hidden rounded-xl border border-rule bg-rule shadow-float sm:grid-cols-2 lg:grid-cols-4">
         {beats.map(([t, d], k) => (
-          <motion.li key={t} {...reveal} transition={{ ...reveal.transition, delay: k * 0.05 }} className="bg-bg p-6">
+          <motion.li key={t} {...reveal} transition={{ ...reveal.transition, delay: k * 0.05 }} className="bg-white p-6">
             <div className="num mb-8 flex items-center gap-3 text-xs text-fg-4">
-              <span className={k === 2 ? "text-signal" : "text-fg"}>{String(k + 1).padStart(2, "0")}</span>
+              <span className={k === 2 ? "text-ocean" : "text-fg"}>{String(k + 1).padStart(2, "0")}</span>
               <span className="h-px flex-1 bg-rule" aria-hidden />
             </div>
             <h3 className="text-lg font-medium tracking-[-0.02em]">{t}</h3>
@@ -177,12 +178,12 @@ export function KeeperStory() {
           </motion.li>
         ))}
       </ol>
-      <div className="mt-4 grid gap-px overflow-hidden rounded-lg border border-rule bg-rule md:grid-cols-2">
-        <div className="flex items-start gap-4 bg-bg p-6">
+      <div className="mt-4 grid gap-px overflow-hidden rounded-xl border border-rule bg-rule shadow-float md:grid-cols-2">
+        <div className="flex items-start gap-4 bg-white p-6">
           <Check className="mt-0.5 h-4 w-4 shrink-0 text-ok" aria-hidden />
           <p className="text-sm text-fg-2"><span className="text-fg">Approved:</span> one transaction, health 0.956 → 1.020, lender repaid through <span className="font-mono">aqua.push</span>.</p>
         </div>
-        <div className="flex items-start gap-4 bg-bg p-6">
+        <div className="flex items-start gap-4 bg-white p-6">
           <X className="mt-0.5 h-4 w-4 shrink-0 text-signal" aria-hidden />
           <p className="text-sm text-fg-2"><span className="text-fg">Cancelled, expired, replayed or the wrong human:</span> HTTP 403, and the transaction is never built.</p>
         </div>
@@ -219,9 +220,9 @@ export function Trust() {
         </dl>
         <div className="lg:col-span-6">
           <div className="label mb-4">CROPS</div>
-          <ul className="grid gap-px overflow-hidden rounded-lg border border-rule bg-rule sm:grid-cols-2">
+          <ul className="grid gap-px overflow-hidden rounded-xl border border-rule bg-rule shadow-float sm:grid-cols-2">
             {crops.map(([t, d]) => (
-              <li key={t} className="bg-bg p-5">
+              <li key={t} className="bg-white p-5">
                 <div className="text-sm font-medium text-fg">{t}</div>
                 <p className="mt-1.5 text-xs leading-relaxed text-fg-3">{d}</p>
               </li>
@@ -235,33 +236,31 @@ export function Trust() {
 
 export function FinalCta() {
   return (
-    <section className="wrap pb-28">
-      <motion.div {...reveal} className="border-t border-rule pt-16">
-        <h2 className="h-display text-[clamp(2.6rem,7vw,6rem)] leading-[0.95]">
-          Lend it. Borrow it.<br /><span className="serif text-signal">Crash it.</span> Rescue it.
+    <section className="relative isolate overflow-hidden pt-28">
+      <motion.div {...reveal} className="wrap relative z-10 pb-44 text-center">
+        <h2 className="h-display mx-auto max-w-4xl text-[clamp(2.6rem,7vw,6rem)] leading-[0.95]">
+          Lend it. Borrow it. <span className="serif text-ocean">Crash it.</span> Rescue it.
         </h2>
-        <div className="mt-10 flex flex-wrap items-center gap-6">
-          <Link href="/app" className="btn-primary !min-h-[48px] !px-6 text-[15px]">Open the playground <ArrowRight className="h-4 w-4" aria-hidden /></Link>
-          <p className="max-w-sm text-sm text-fg-3">The whole lifecycle takes about two minutes, with a one-click demo wallet and nothing to install.</p>
-        </div>
+        <p className="mx-auto mt-6 max-w-md text-fg-3">The whole lifecycle takes about two minutes, with a one-click demo wallet and nothing to install.</p>
+        <Link href="/app" className="btn-ocean mt-9 !min-h-[52px] !px-7 text-[15px]">Dive in <ArrowRight className="h-4 w-4" aria-hidden /></Link>
       </motion.div>
+      <Waves tone="deep" className="absolute inset-x-0 bottom-0 h-40" />
     </section>
   );
 }
 
 export function Footer() {
   return (
-    <footer className="border-t border-rule">
-      <div className="wrap grid gap-8 py-10 text-sm text-fg-3 md:grid-cols-12">
-        <div className="flex items-center gap-2.5 md:col-span-5">
-          <Mark className="h-4 w-4 text-fg" />
-          <span className="text-fg">AquaPrime</span>
-          <span className="text-fg-4">— capital that never leaves</span>
+    <footer className="bg-ocean-deep text-white/70">
+      <div className="wrap grid gap-8 py-12 text-sm md:grid-cols-12">
+        <div className="md:col-span-5">
+          <div className="flex items-center gap-2.5 text-white"><Mark className="h-5 w-5" /><span className="font-semibold">AquaPrime</span></div>
+          <p className="mt-3 max-w-xs text-white/60">Zero-custody credit and surgical liquidations, built on 1inch Aqua and SwapVM.</p>
         </div>
-        <ul className="flex flex-wrap gap-x-6 gap-y-2 md:col-span-7 md:justify-end">
+        <ul className="flex flex-wrap content-start gap-x-6 gap-y-2 md:col-span-7 md:justify-end">
           <li>No trackers</li>
           <li>MIT</li>
-          <li><a href="https://github.com/rythmern02/treaz" target="_blank" rel="noreferrer" className="link inline-flex items-center gap-1">Source <ArrowUpRight className="h-3 w-3" aria-hidden /></a></li>
+          <li><a href="https://github.com/rythmern02/treaz" target="_blank" rel="noreferrer" className="focus-ring inline-flex items-center gap-1 rounded underline decoration-white/30 underline-offset-4 hover:text-white">Source <ArrowUpRight className="h-3 w-3" aria-hidden /></a></li>
           <li>ETHGlobal Mumbai 2026</li>
         </ul>
       </div>

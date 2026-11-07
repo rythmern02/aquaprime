@@ -5,7 +5,8 @@ import { simulate } from "@/lib/riskmath";
 import { ease, SectionHead } from "./ui";
 
 const money = (n: number, dp = 0) => `$${n.toLocaleString("en-US", { maximumFractionDigits: dp, minimumFractionDigits: dp })}`;
-const BONE = "#EDEBE5", SIGNAL = "#FF5B24", WARN = "#E3A63C";
+import { C } from "@/lib/theme";
+const BONE = C.ocean, SIGNAL = C.signal, WARN = C.warn;
 
 function Slider({ label, value, min, max, step, onChange, fmt, hint }: {
   label: string; value: number; min: number; max: number; step: number; onChange: (v: number) => void; fmt: (v: number) => string; hint?: string;
@@ -19,8 +20,8 @@ function Slider({ label, value, min, max, step, onChange, fmt, hint }: {
         <span className="num text-[15px] text-fg">{fmt(value)}</span>
       </div>
       <input id={id} type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))}
-        className="focus-ring h-[3px] w-full cursor-pointer appearance-none rounded-none accent-fg"
-        style={{ background: `linear-gradient(90deg, ${BONE} ${pct}%, #34332E ${pct}%)` }} />
+        className="focus-ring h-[3px] w-full cursor-pointer appearance-none rounded-none accent-ocean"
+        style={{ background: `linear-gradient(90deg, ${C.ocean} ${pct}%, ${C.rule2} ${pct}%)` }} />
       {hint && <div className="mt-2 text-xs text-fg-4">{hint}</div>}
     </div>
   );
@@ -31,20 +32,21 @@ function Gauge({ hf }: { hf: number }) {
   const angle = (v / 2) * 180;
   const tone = hf < 1 ? SIGNAL : hf < 1.1 ? WARN : BONE;
   const r = 80, cx = 100, cy = 100;
-  const pt = (a: number, rr = r) => [cx - rr * Math.cos((a * Math.PI) / 180), cy - rr * Math.sin((a * Math.PI) / 180)];
+  // rounded so server and client render identical attributes (no hydration mismatch)
+  const pt = (a: number, rr = r) => [cx - rr * Math.cos((a * Math.PI) / 180), cy - rr * Math.sin((a * Math.PI) / 180)].map((n) => Math.round(n * 100) / 100);
   const [x, y] = pt(angle);
   return (
     <svg viewBox="0 0 200 116" className="w-full max-w-[280px]" role="img" aria-label={`Health factor ${hf === Infinity ? "infinite" : hf.toFixed(3)}`}>
       {Array.from({ length: 21 }, (_, i) => {
         const a = i * 9, [x1, y1] = pt(a, 88), [x2, y2] = pt(a, i % 5 ? 92 : 96);
-        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={i === 10 ? SIGNAL : "#4A4843"} strokeWidth="1" />;
+        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={i === 10 ? SIGNAL : C.fg4} strokeWidth="1" />;
       })}
-      <path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="#24231F" strokeWidth="3" />
+      <path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke={C.rule} strokeWidth="3" />
       <motion.path d={`M20 100 A80 80 0 0 1 ${x} ${y}`} fill="none" stroke={tone} strokeWidth="3"
         initial={false} animate={{ d: `M20 100 A80 80 0 0 1 ${x} ${y}` }} transition={{ duration: 0.35, ease }} />
-      <text x="100" y="8" textAnchor="middle" fontSize="7.5" fill="#8C887F" fontFamily="var(--font-mono)">1.00</text>
+      <text x="100" y="8" textAnchor="middle" fontSize="7.5" fill={C.fg3} fontFamily="var(--font-mono)">1.00</text>
       <text x="100" y="84" textAnchor="middle" fontSize="32" fill={tone} fontFamily="var(--font-mono)" letterSpacing="-1">{hf === Infinity ? "∞" : hf.toFixed(3)}</text>
-      <text x="100" y="102" textAnchor="middle" fontSize="7.5" fill="#8C887F" fontFamily="var(--font-mono)" letterSpacing="1.2">HEALTH FACTOR</text>
+      <text x="100" y="102" textAnchor="middle" fontSize="7.5" fill={C.fg3} fontFamily="var(--font-mono)" letterSpacing="1.2">HEALTH FACTOR</text>
     </svg>
   );
 }
@@ -57,7 +59,7 @@ function Bar({ label, eth, total, price, tone, note }: { label: string; eth: num
         <span className="label">{label}</span>
         <span className="num text-sm text-fg">{eth.toFixed(3)} ETH <span className="text-fg-4">/ {money(eth * price)}</span></span>
       </div>
-      <div className="relative h-3 bg-raised">
+      <div className="relative h-3 overflow-hidden rounded-full bg-raised">
         <motion.div className={`hatch absolute inset-y-0 left-0 border-r ${tone}`} initial={false} animate={{ width: `${pct}%` }} transition={{ duration: 0.5, ease }} />
       </div>
       <div className="mt-1.5 text-xs text-fg-4">{note}</div>
@@ -81,12 +83,12 @@ export function CrashSimulator() {
         The numbers below run the same surgical formula as the contract. Nothing is mocked: change any input and the slice is recomputed.
       </SectionHead>
 
-      <div className="mt-14 grid overflow-hidden rounded-lg border border-rule lg:grid-cols-12">
-        <div className="bg-panel p-6 sm:p-8 lg:col-span-5">
-          <div role="radiogroup" aria-label="Borrower tier" className="mb-8 flex rounded-md border border-rule-2 p-0.5">
+      <div className="card mt-14 grid overflow-hidden lg:grid-cols-12">
+        <div className="bg-raised/60 p-6 sm:p-8 lg:col-span-5">
+          <div role="radiogroup" aria-label="Borrower tier" className="mb-8 flex rounded-full border border-rule-2 bg-white p-0.5">
             {([["World ID human", true], ["Anonymous", false]] as const).map(([l, v]) => (
               <button key={l} role="radio" aria-checked={human === v} onClick={() => setHuman(v)}
-                className={`focus-ring min-h-[36px] flex-1 rounded px-3 font-mono text-[11px] uppercase tracking-[0.06em] transition-colors ${human === v ? "bg-fg text-bg" : "text-fg-3 hover:text-fg"}`}>{l}</button>
+                className={`focus-ring min-h-[36px] flex-1 rounded-full px-3 font-mono text-[11px] uppercase tracking-[0.06em] transition-colors ${human === v ? "bg-fg text-white" : "text-fg-3 hover:text-fg"}`}>{l}</button>
             ))}
           </div>
           <Slider label="ETH price" value={price} min={1200} max={3200} step={10} onChange={setPrice} fmt={(v) => money(v)}
@@ -109,7 +111,7 @@ export function CrashSimulator() {
           </div>
 
           <div className="flex flex-col gap-6">
-            <Bar label="AquaPrime sells" eth={r.surgical.collateralOut + r.surgical.fee} total={collateral} price={price} tone="border-fg bg-fg/80 text-transparent"
+            <Bar label="AquaPrime sells" eth={r.surgical.collateralOut + r.surgical.fee} total={collateral} price={price} tone="border-ocean bg-ocean text-transparent"
               note={under ? `Exact slice at ${(discountBps / 100).toFixed(2)}% discount, plus the 0.5% protocol fee` : "Nothing — the position is solvent"} />
             <Bar label="Legacy lender sells" eth={r.legacy.collateralOut} total={collateral} price={price} tone="border-signal text-signal/70"
               note={under ? `${r.hf < 0.95 ? "100%" : "50%"} close factor at a flat 5% bonus` : "Nothing — the position is solvent"} />

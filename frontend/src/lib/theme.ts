@@ -1,0 +1,20 @@
+/** Single source for colours used by Tailwind *and* by SVG/WebGL code that can't read Tailwind classes. */
+export const C = {
+  bg: "#F4F9FE",
+  panel: "#FFFFFF",
+  raised: "#EAF3FC",
+  rule: "#D9E7F3",
+  rule2: "#BFD5E9",
+  fg: "#06223D",
+  fg2: "#284863",
+  fg3: "#4F6B85",
+  fg4: "#7F97AC",
+  ocean: "#0B7FE8",
+  deep: "#0A4A85",
+  aqua: "#1FC2E3",
+  mist: "#CFEAFB",
+  signal: "#E8473B",
+  signalSoft: "#FF7A6E",
+  ok: "#0E9467",
+  warn: "#C27400",
+} as const;

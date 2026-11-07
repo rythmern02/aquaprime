@@ -14,7 +14,7 @@ export function Mark({ className = "h-5 w-5" }: { className?: string }) {
   return (
     <svg viewBox="0 0 20 20" className={className} aria-hidden>
       <path d="M1.5 1.5h17v11l-6 6h-11z" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M14 14h4.5L14 18.5z" fill="#FF5B24" />
+      <path d="M14 14h4.5L14 18.5z" fill="#1FC2E3" />
     </svg>
   );
 }

@@ -35,7 +35,7 @@ function PrivacyPill() {
         <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} aria-hidden /> {s.t}
       </button>
       {open && (
-        <div role="dialog" aria-label="Read privacy" className="panel absolute right-0 top-10 z-50 w-72 p-4 text-xs leading-relaxed text-fg-2 shadow-2xl shadow-black/60">
+        <div role="dialog" aria-label="Read privacy" className="panel absolute right-0 top-10 z-50 w-72 p-4 text-xs leading-relaxed text-fg-2 shadow-lift">
           {mode === "direct-local"
             ? "You're on a local chain. Anonymity networks can't reach localhost, so reads go direct. On Sepolia every read goes through EF Anon-RPC (Nox mixnet)."
             : "Balances, health factors and liquidation quotes are fetched through a hash-pinned EF Anon-RPC worker in a sandboxed iframe, so your RPC provider can't link liquidation interest to you."}

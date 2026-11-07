@@ -7,7 +7,7 @@ import { disassemble, splitOrder, type Instruction } from "@/lib/swapvm";
 import { bps, eth, short, usd } from "@/lib/format";
 
 const BANK_STYLE: Record<Instruction["bank"], string> = {
-  aquaprime: "border-signal/70 bg-signal/15 text-signal",
+  aquaprime: "border-ocean/60 bg-ocean/10 text-ocean",
   curve: "border-fg/60 bg-fg/10 text-fg",
   fee: "border-warn/60 bg-warn/10 text-warn",
   control: "border-fg-4/50 bg-fg-4/10 text-fg-2",
@@ -48,7 +48,7 @@ export function BytecodePanel({ borrower, auctionActive }: { borrower?: Address;
           <div className="label">02 · SwapVM Bytecode &amp; Register Dissector</div>
           <h2 className="mt-1 text-lg font-semibold text-fg">What actually runs on AquaPrimeRouter</h2>
         </div>
-        <span className="tag border-signal/50 text-signal">custom bank 0xf0+</span>
+        <span className="tag border-ocean/50 text-ocean">custom bank 0xf0+</span>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -85,7 +85,7 @@ export function BytecodePanel({ borrower, auctionActive }: { borrower?: Address;
                 <span className={`tag shrink-0 font-mono ${BANK_STYLE[i.bank]}`}>0x{i.opcode.toString(16).padStart(2, "0")}</span>
                 <div className="min-w-0 flex-1">
                   <div className="text-sm text-fg">
-                    {i.name} {i.custom && <span className="ml-1 text-[10px] uppercase tracking-wider text-signal">custom</span>}
+                    {i.name} {i.custom && <span className="ml-1 text-[10px] uppercase tracking-wider text-ocean">custom</span>}
                   </div>
                   <div className="font-mono text-[11px] text-fg-3">
                     {Object.entries(i.decoded).map(([k, v]) => <span key={k} className="mr-3">{k}=<span className="text-fg">{v.length > 20 ? short(v, 6) : v}</span></span>)}

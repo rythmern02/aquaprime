@@ -1,8 +1,9 @@
 import type { Config } from "tailwindcss";
+import { C } from "./src/lib/theme";
 
 /**
- * "Graphite / Signal" — see ../brand.md.
- * Warm near-black surfaces, bone text, one signal colour that means "look here".
+ * "Open Water" — see ../brand.md.
+ * Sky-white surfaces, deep-sea navy ink, ocean blue for action, coral only for danger.
  */
 export default {
   content: ["./src/**/*.{ts,tsx}"],
@@ -15,21 +16,33 @@ export default {
         mono: ["var(--font-mono)", "ui-monospace", "SFMono-Regular"],
       },
       colors: {
-        bg: "#0B0B0A",
-        panel: "#111110",
-        raised: "#191917",
-        rule: { DEFAULT: "#24231F", 2: "#34332E" },
-        fg: { DEFAULT: "#EDEBE5", 2: "#BDB9B0", 3: "#8C887F", 4: "#66635C" },
-        signal: { DEFAULT: "#FF5B24", soft: "#FF8A5F" },
-        ok: "#55C48C",
-        warn: "#E3A63C",
+        bg: C.bg,
+        panel: C.panel,
+        raised: C.raised,
+        rule: { DEFAULT: C.rule, 2: C.rule2 },
+        fg: { DEFAULT: C.fg, 2: C.fg2, 3: C.fg3, 4: C.fg4 },
+        ocean: { DEFAULT: C.ocean, deep: C.deep, aqua: C.aqua, mist: C.mist },
+        signal: { DEFAULT: C.signal, soft: C.signalSoft },
+        ok: C.ok,
+        warn: C.warn,
       },
-      borderRadius: { sm: "2px", DEFAULT: "4px", md: "6px", lg: "8px", xl: "10px" },
+      borderRadius: { sm: "4px", DEFAULT: "6px", md: "10px", lg: "14px", xl: "20px", "2xl": "28px" },
+      boxShadow: {
+        float: "0 1px 1px rgba(6,34,61,.04), 0 8px 24px -8px rgba(6,34,61,.12), 0 24px 48px -24px rgba(11,132,243,.18)",
+        lift: "0 2px 2px rgba(6,34,61,.05), 0 18px 40px -12px rgba(6,34,61,.22)",
+      },
       transitionTimingFunction: { out: "cubic-bezier(.2,.8,.2,1)" },
       keyframes: {
-        blink: { "0%,100%": { opacity: "1" }, "50%": { opacity: ".25" } },
+        blink: { "0%,100%": { opacity: "1" }, "50%": { opacity: ".3" } },
+        swell: { "0%,100%": { transform: "translateX(0)" }, "50%": { transform: "translateX(-25%)" } },
+        bob: { "0%,100%": { transform: "translateY(0)" }, "50%": { transform: "translateY(-6px)" } },
       },
-      animation: { blink: "blink 1.6s steps(2,start) infinite" },
+      animation: {
+        blink: "blink 1.6s ease-in-out infinite",
+        swell: "swell 14s ease-in-out infinite",
+        "swell-slow": "swell 22s ease-in-out infinite",
+        bob: "bob 5s ease-in-out infinite",
+      },
     },
   },
   plugins: [],
