@@ -26,6 +26,7 @@ function PrivacyPill() {
   const s = mode === "anon"
     ? anonStatus === "ready" ? { t: "Anon-RPC", dot: "bg-ok" }
       : anonStatus === "failed" ? { t: "Anon-RPC down", dot: "bg-signal" }
+      : anonStatus === "degraded" ? { t: "Mixnet slow", dot: "bg-warn animate-blink" }
       : { t: "Joining mixnet", dot: "bg-warn animate-blink" }
     : mode === "direct-local" ? { t: "Local RPC", dot: "bg-fg-4" }
     : { t: "Direct RPC", dot: "bg-warn" };
@@ -39,7 +40,8 @@ function PrivacyPill() {
           {mode === "direct-local"
             ? "You're on a local chain. Anonymity networks can't reach localhost, so reads go direct. On Sepolia every read goes through EF Anon-RPC (Nox mixnet)."
             : "Balances, health factors and liquidation quotes are fetched through a hash-pinned EF Anon-RPC worker in a sandboxed iframe, so your RPC provider can't link liquidation interest to you."}
-          {mode === "anon" && anonStatus === "failed" && <button className="btn-ghost mt-3 w-full" onClick={() => setMode("direct-optout")}>Use direct RPC (less private)</button>}
+          {mode === "anon" && anonStatus === "degraded" && <p className="mt-2 text-warn">The Nox mixnet is answering slowly right now, so live values may stay blank.</p>}
+          {mode === "anon" && (anonStatus === "failed" || anonStatus === "degraded") && <button className="btn-ghost mt-3 w-full" onClick={() => setMode("direct-optout")}>Use direct RPC (less private)</button>}
           {mode === "direct-optout" && <button className="btn-ghost mt-3 w-full" onClick={() => setMode("anon")}>Turn private reads on</button>}
         </div>
       )}

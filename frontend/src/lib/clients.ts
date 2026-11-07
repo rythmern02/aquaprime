@@ -19,9 +19,14 @@ export function initialReadMode(): ReadMode {
 }
 
 let rpcId = 0, preferred = 0;
-export function makePublicClient(mode: ReadMode): PublicClient {
+/**
+ * `onHealth` reports mixnet read health: "degraded" after several consecutive failed reads (the Nox network can be
+ * slow or partially down), "ok" again on the next success. The UI then OFFERS the opt-out — it never switches itself.
+ */
+export function makePublicClient(mode: ReadMode, onHealth?: (h: "ok" | "degraded") => void): PublicClient {
   if (mode !== "anon") return createPublicClient({ chain, transport: http(RPC_URL, { batch: true }) }) as PublicClient;
   const urls = rpcList(CHAIN_ID, RPC_URL);
+  let failures = 0;
   return createPublicClient({
     chain,
     transport: custom({
@@ -37,7 +42,12 @@ export function makePublicClient(mode: ReadMode): PublicClient {
             preferred = i; break;
           } catch (e) { lastErr = e; r = undefined; }
         }
-        if (!r) throw lastErr instanceof Error ? lastErr : new Error("All RPC endpoints failed");
+        if (!r) {
+          if (++failures === 3) onHealth?.("degraded");
+          throw lastErr instanceof Error ? lastErr : new Error("All RPC endpoints failed");
+        }
+        if (failures >= 3) onHealth?.("ok");
+        failures = 0;
         if (r.error) {
           const err = new Error(r.error.message) as Error & { code?: number; data?: unknown };
           err.code = r.error.code;

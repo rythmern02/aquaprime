@@ -31,7 +31,7 @@ const wagmiConfig = createConfig({
 interface ReadCtx {
   client: PublicClient;
   mode: ReadMode;
-  anonStatus: "booting" | "ready" | "failed" | "n/a";
+  anonStatus: "booting" | "ready" | "degraded" | "failed" | "n/a";
   anonError?: string;
   setMode: (m: ReadMode) => void;
 }
@@ -60,7 +60,7 @@ export function Providers({ children }: { children: ReactNode }) {
     return () => { cancelled = true; };
   }, [mode]);
 
-  const client = useMemo(() => makePublicClient(mode), [mode]);
+  const client = useMemo(() => makePublicClient(mode, (h) => setAnonStatus(h === "degraded" ? "degraded" : "ready")), [mode]);
   const setMode = (m: ReadMode) => {
     try { localStorage.setItem("aquaprime.readMode", m); } catch { /* ignore */ }
     setModeState(m);

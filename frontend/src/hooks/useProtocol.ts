@@ -1,4 +1,5 @@
 "use client";
+import { readPolicy } from "@/lib/readPolicy";
 import { useQuery } from "@tanstack/react-query";
 import { type Address, type Hex, zeroAddress } from "viem";
 import { deployment, type Order } from "@/config";
@@ -13,6 +14,7 @@ export function useMarket() {
   const { client, mode } = useReads();
   return useQuery({
     queryKey: ["market", mode],
+    ...readPolicy(mode),
     queryFn: async () => {
       const [price, round, block] = await Promise.all([
         client.readContract({ address: c.registry, abi: registryAbi, functionName: "price" }).catch(() => 0n),
@@ -30,6 +32,7 @@ export function useMaker() {
   const s = deployment.strategies;
   return useQuery({
     queryKey: ["maker", mode],
+    ...readPolicy(mode),
     enabled: !!s,
     queryFn: async () => {
       const maker = s!.maker;
@@ -64,6 +67,7 @@ export function usePosition(borrower?: Address) {
   const { client, mode } = useReads();
   return useQuery({
     queryKey: ["position", borrower, mode],
+    ...readPolicy(mode),
     enabled: !!borrower,
     queryFn: async () => {
       const b = borrower!;
@@ -86,6 +90,7 @@ export function useAuctionRegisters(borrower?: Address, active?: boolean) {
   const { client, mode } = useReads();
   return useQuery({
     queryKey: ["registers", borrower, active, mode],
+    ...readPolicy(mode),
     enabled: !!borrower && !!active,
     queryFn: async () => {
       const b = borrower!;

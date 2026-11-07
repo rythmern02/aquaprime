@@ -1,4 +1,5 @@
 "use client";
+import { readPolicy } from "@/lib/readPolicy";
 import { useQuery } from "@tanstack/react-query";
 import { parseAbiItem, type Address } from "viem";
 import { deployment } from "@/config";
@@ -23,7 +24,7 @@ export function useNetwork() {
   const { client, mode } = useReads();
   return useQuery({
     queryKey: ["network", mode],
-    refetchInterval: 8000,
+    ...readPolicy(mode, 8000),
     queryFn: async () => {
       const s = deployment.strategies;
       const [price, interestRev, liqRev, block] = await Promise.all([
