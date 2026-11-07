@@ -1,7 +1,7 @@
 {
   "name": "aquaprime",
   "version": "0.0.1",
-  "description": "AquaPrime — zero-custody prime credit & surgical liquidation engine on 1inch Aqua + SwapVM",
+  "description": "AquaPrime \u2014 zero-custody prime credit & surgical liquidation engine on 1inch Aqua + SwapVM",
   "author": "Degensoft Ltd.",
   "license": "MIT",
   "scripts": {
@@ -23,7 +23,8 @@
     "verify:sepolia": "hardhat etherscan-verify --network sepolia",
     "agentpass:test-idp": "node scripts/e2e-agentpass.mjs idp",
     "agentpass:e2e": "node scripts/e2e-agentpass.mjs run",
-    "demo:local": "bash scripts/demo-local.sh"
+    "demo:local": "bash scripts/demo-local.sh",
+    "demo:sepolia": "bash scripts/demo-sepolia.sh"
   },
   "dependencies": {
     "@1inch/aqua": "https://github.com/1inch/aqua#6f05aa1ac2dcf701b0e086ad5e7606515f1fa454",
