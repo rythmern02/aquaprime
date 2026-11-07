@@ -12,9 +12,15 @@ const c = deployment.contracts;
 export type Log = (l: LogLine["level"], m: string, tx?: string) => void;
 
 export async function api<T>(path: string, body?: unknown) {
-  const res = await fetch(path, body === undefined ? undefined : {
-    method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body),
-  });
+  let res: Response;
+  try {
+    res = await fetch(path, body === undefined ? undefined : {
+      method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body),
+    });
+  } catch {
+    // fetch only throws when the request never reached a server (restart, crash, offline)
+    throw new Error("Can't reach the app server. If you're running locally, check that `npm run demo:local` is still up, then reload.");
+  }
   return { ok: res.ok, status: res.status, data: (await res.json().catch(() => ({}))) as T & { error?: string; code?: string } };
 }
 

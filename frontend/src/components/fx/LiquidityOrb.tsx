@@ -118,6 +118,9 @@ function webglAvailable() {
 
 export default function LiquidityOrb({ stress = 0, rings = 3, className = "" }: { stress?: number; rings?: number; className?: string }) {
   const [gl, setGl] = useState<boolean | null>(null);
+  // the browser can drop a WebGL context at any time (GPU reset, too many contexts): fall back to CSS
+  const onCreated = ({ gl: r }: { gl: THREE.WebGLRenderer }) =>
+    r.domElement.addEventListener("webglcontextlost", (e) => { e.preventDefault(); setGl(false); }, { once: true });
   useEffect(() => setGl(webglAvailable()), []);
   const reduce = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const defs = [
@@ -130,7 +133,7 @@ export default function LiquidityOrb({ stress = 0, rings = 3, className = "" }: 
     <div className={className} aria-hidden>
       {gl === false ? fallback : gl && (
         <GlBoundary fallback={fallback}>
-          <Canvas camera={{ position: [0, 0, 5.2], fov: 45 }} dpr={[1, 1.75]} frameloop={reduce ? "demand" : "always"} gl={{ antialias: true, alpha: true }}>
+          <Canvas camera={{ position: [0, 0, 5.2], fov: 45 }} dpr={[1, 1.75]} frameloop={reduce ? "demand" : "always"} gl={{ antialias: true, alpha: true }} onCreated={onCreated}>
             <Rig>
               <Core stress={stress} />
               {defs.slice(0, rings).map((d) => <Ring key={d.color} {...d} flow={1 - stress * 0.7} />)}

@@ -244,7 +244,7 @@ export function Playground() {
             {graceLeft > 0 && CHAIN_ID === 31337 && <button className="btn-ghost" disabled={busy} onClick={() => a.skipGrace()}>Skip 3-min grace (local)</button>}
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            <button className="btn-signal !min-h-[56px]" disabled={busy} onClick={() => a.deniedPath(me)}><X className="h-4 w-4" aria-hidden /> Test denied path</button>
+            <button className="btn-ghost !min-h-[56px]" disabled={busy || !p?.auctionActive} title={p?.auctionActive ? undefined : "Ship the 0xf0 auction first"} onClick={() => a.deniedPath(me)}><X className="h-4 w-4" aria-hidden /> Test denied path</button>
             <button className="btn-primary !min-h-[56px]" disabled={busy || !p?.auctionActive || graceLeft > 0}
               onClick={() => { if (p) setBefore({ coll: Number(p.collateral) / 1e18, hf: Number(p.healthFactor) / 1e18, debt: Number(p.debt) / 1e6, price: Number(market.data?.price ?? 0n) / 1e6 }); a.approveAndExecute(me, idp.data?.label ?? "IdP"); }}>
               <Zap className="h-4 w-4" aria-hidden /> Approve & rescue
