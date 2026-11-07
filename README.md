@@ -123,6 +123,29 @@ The maker `0x866E…6814` ships 3 strategies from one wallet (3.0x SLAC). Loans 
 from that wallet; the registry holds 0 USDC. Browser reads go through Anon-RPC on the **Nox mixnet**
 (verified in Chrome: "Private Read Mode: ON").
 
+### Hosted demo market (Sepolia)
+
+Next to the canonical market above, a **clearly labelled demo market** lets judges run the whole lifecycle on Sepolia
+with no wallet: its price feed is an `OperatorPriceFeed` (owned by the keeper) instead of Chainlink, so ETH can be
+"crashed" on demand. Everything else is real — the same canonical 1inch Aqua, Circle USDC and WETH, the same maker
+wallet (its 15 USDC backs both markets at once). Agent Pass approvals on the hosted site come from a **hosted test
+IdP labelled "NOT World"** until World allow-lists the app; the backend validates it exactly like auth.world.org.
+All six contracts are Sourcify exact-match.
+
+| Demo-market contract | Address |
+|---|---|
+| CreditPositionRegistry | [`0xbA67558c205EcDC84898c3b069d4F0280b10F100`](https://sepolia.etherscan.io/address/0xbA67558c205EcDC84898c3b069d4F0280b10F100) |
+| LiquidationExecutor | [`0x4E393F94cB0Af02f4c56B7d930C4f8464a5b6509`](https://sepolia.etherscan.io/address/0x4E393F94cB0Af02f4c56B7d930C4f8464a5b6509) |
+| AquaPrimeRouter | [`0x174e39FE19ce1d1c5D070208E3bA2Edc98C856BB`](https://sepolia.etherscan.io/address/0x174e39FE19ce1d1c5D070208E3bA2Edc98C856BB) |
+| StrategyBuilder | [`0x08D4323adabded24e29F734e492BA765BeC1dD1b`](https://sepolia.etherscan.io/address/0x08D4323adabded24e29F734e492BA765BeC1dD1b) |
+| AquaAMM | [`0xd3c1E9AA87a2b1F77035Dc28D7228014bbCedE9c`](https://sepolia.etherscan.io/address/0xd3c1E9AA87a2b1F77035Dc28D7228014bbCedE9c) |
+| OperatorPriceFeed (demo only) | [`0x481Fe6851CB7573F40aF7D7cE8c13632bE3A4489`](https://sepolia.etherscan.io/address/0x481Fe6851CB7573F40aF7D7cE8c13632bE3A4489) |
+
+Judge flow: open `/app` → **Start a live rescue** (the server resets a demo position to HF 1.11 at the real Chainlink
+price, one tx per call) → crash ETH → ship the 0xf0 auction → try the denied path (HTTP 403) → approve on the test
+IdP → one-transaction surgical rescue. One session at a time (10-minute lease), per-network and daily caps.
+Run the hosted configuration locally with `npm run demo:sepolia`; deploy it with [docs/DEPLOY_VERCEL.md](docs/DEPLOY_VERCEL.md).
+
 ## Run it
 
 Requirements: Node 20+, a browser wallet (MetaMask etc.).
