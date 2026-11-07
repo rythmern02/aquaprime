@@ -10,6 +10,9 @@ import { HardhatUserConfig } from 'hardhat/config';
 
 dotenv.config();
 
+// ethers' default 1.5 gwei priority tip is ~100,000× Sepolia's current base fee; pay a sane fixed price instead.
+const SEPOLIA_GAS_PRICE = Number(process.env.SEPOLIA_GAS_PRICE_WEI || 50_000_000); // 0.05 gwei
+
 const config: HardhatUserConfig = {
   networks: {
     localhost: {
@@ -18,8 +21,15 @@ const config: HardhatUserConfig = {
     sepolia: {
       url: process.env.SEPOLIA_RPC_URL || "https://ethereum-sepolia-rpc.publicnode.com",
       accounts: process.env.PRIVATE_KEY ? ["0x" + process.env.PRIVATE_KEY] : [],
+      gasPrice: SEPOLIA_GAS_PRICE,
     },
-    // Add your deployment network here and the corresponding URL in the .env file
+    // Same chain as `sepolia`, separate hardhat-deploy records: the labelled demo market (operator oracle).
+    sepoliaDemo: {
+      url: process.env.SEPOLIA_RPC_URL || "https://ethereum-sepolia-rpc.publicnode.com",
+      accounts: process.env.PRIVATE_KEY ? ["0x" + process.env.PRIVATE_KEY] : [],
+      chainId: 11155111,
+      gasPrice: SEPOLIA_GAS_PRICE,
+    },
   },
   namedAccounts: {
     deployer: {

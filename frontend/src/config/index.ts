@@ -24,8 +24,8 @@ export interface Deployment {
   };
 }
 
-// Every chain the deploy script has written to ./deployments (index.ts is generated).
-const DEPLOYMENTS = RAW as Record<number, Deployment>;
+// Every chain/market the deploy script has written to ./deployments (index.ts is generated).
+const DEPLOYMENTS = RAW as Record<string, Deployment>;
 
 export const CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID || 31337);
 export const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || "http://127.0.0.1:8545";
@@ -44,9 +44,14 @@ export function rpcList(chainId: number, primary?: string): string[] {
   return [...new Set([primary, ...extra].filter((u): u is string => !!u))];
 }
 
+/** Optional market on the chain, e.g. "demo" → deployments/11155111-demo.json (Sepolia's labelled demo market). */
+export const MARKET = process.env.NEXT_PUBLIC_MARKET || "";
+export const IS_DEMO_MARKET = MARKET === "demo";
+
 export const deployment: Deployment = (() => {
-  const d = DEPLOYMENTS[CHAIN_ID];
-  if (!d) throw new Error(`No AquaPrime deployment for chain ${CHAIN_ID}. Run the deploy script first.`);
+  const key = MARKET ? `${CHAIN_ID}-${MARKET}` : String(CHAIN_ID);
+  const d = DEPLOYMENTS[key];
+  if (!d) throw new Error(`No AquaPrime deployment "${key}". Run the deploy script first.`);
   return d;
 })();
 

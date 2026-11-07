@@ -1,0 +1,58 @@
+{
+  "chainId": 11155111,
+  "network": "sepoliaDemo",
+  "deployBlock": 12080835,
+  "contracts": {
+    "aqua": "0x1111113ccf1426a8e30e2bff5e005d929bf6a90a",
+    "weth": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+    "usdc": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+    "priceFeed": "0x481Fe6851CB7573F40aF7D7cE8c13632bE3A4489",
+    "router": "0x174e39FE19ce1d1c5D070208E3bA2Edc98C856BB",
+    "builder": "0x08D4323adabded24e29F734e492BA765BeC1dD1b",
+    "registry": "0xbA67558c205EcDC84898c3b069d4F0280b10F100",
+    "executor": "0x4E393F94cB0Af02f4c56B7d930C4f8464a5b6509",
+    "aquaAMM": "0xd3c1E9AA87a2b1F77035Dc28D7228014bbCedE9c"
+  },
+  "roles": {
+    "deployer": "0x0D0e87B38B050861229e4C987b38B08E911D546E",
+    "treasury": "0x0D0e87B38B050861229e4C987b38B08E911D546E",
+    "attester": "0x4470A4f636d1FF870F04aaE7cBd6c16D9f9768E7",
+    "keeper": "0x68A538Cb81DCe8Bfd14579FD3A4340Db7b98C8b2"
+  },
+  "oracleMode": "operator",
+  "strategies": {
+    "maker": "0x866E1604a215F5e4d50382d4328dfe69A86D6814",
+    "creditLine": {
+      "hash": "0x0c4eba00021e5b363c6bbeeb240b1c4960fa5e75dc534950ffa603f307e00594",
+      "aprBps": 800,
+      "salt": 1794020246,
+      "amount": "15000000"
+    },
+    "backstop": {
+      "order": {
+        "maker": "0x866E1604a215F5e4d50382d4328dfe69A86D6814",
+        "traits": "0x4000000000280028002800280000000000000000000000000000000000000000",
+        "data": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238fff9976782d46cc05630d1f6ebab18b2324d6b142f0ab7d930c4f8464a5b6509f12e481fe6851cb7573f40af7d7ce8c13632be3a4489fff9976782d46cc05630d1f6ebab18b2324d6b14006400001c201901001408000000006aee9396"
+      },
+      "hash": "0x3391dfa2b43ac65254f4f665a1f04d776560dbfbe70ba2357b53a86adf2637c7",
+      "discountBps": 100,
+      "amount": "15000000"
+    },
+    "amm": {
+      "order": {
+        "maker": "0x866E1604a215F5e4d50382d4328dfe69A86D6814",
+        "traits": "0x4000000000280028002800280000000000000000000000000000000000000000",
+        "data": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238fff9976782d46cc05630d1f6ebab18b2324d6b141504002dc6c011001408000000006aee9396"
+      },
+      "hash": "0x874edde5c91477679135b438d7be64f407601c8e987fd0b3f3660af905279887",
+      "tokens": [
+        "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+      ],
+      "amounts": [
+        "15000000",
+        "50000000000000000"
+      ]
+    }
+  }
+}

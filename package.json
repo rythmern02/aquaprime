@@ -15,6 +15,8 @@
     "deploy:sepolia": "hardhat deploy --network sepolia && npm run export-abis",
     "seed:localhost": "hardhat run scripts/seed-strategies.ts --network localhost",
     "seed:sepolia": "hardhat run scripts/seed-strategies.ts --network sepolia",
+    "deploy:sepolia-demo": "MARKET=demo ORACLE_MODE=operator hardhat deploy --network sepoliaDemo && npm run export-abis",
+    "seed:sepolia-demo": "MARKET=demo hardhat run scripts/seed-strategies.ts --network sepoliaDemo",
     "export-abis": "ts-node --transpile-only scripts/export-abis.ts",
     "keeper": "ts-node --transpile-only agent/keeper.ts",
     "preflight:sepolia": "hardhat run scripts/preflight-sepolia.ts --network sepolia",

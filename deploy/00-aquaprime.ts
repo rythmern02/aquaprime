@@ -32,7 +32,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const isLocal = network.name === "hardhat" || network.name === "localhost";
   // Live-network overrides from .env never apply to a local chain (those keys/addresses don't exist there).
   const env = (k: string) => (isLocal ? undefined : process.env[k]);
-  const live = LIVE[network.name];
+  const live = LIVE[network.name === "sepoliaDemo" ? "sepolia" : network.name];
   const opts = { from: deployer, log: true, waitConfirmations: isLocal ? 1 : 2 };
 
   const aqua = env("AQUA_ADDRESS") || (await deploy("Aqua", { ...opts, args: [] })).address;
@@ -48,12 +48,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     usdc = process.env.USDC_ADDRESS || live.usdc;
   }
 
-  if (isLocal || process.env.ORACLE_MODE === "operator") {
-    const initial = BigInt(process.env.INITIAL_ETH_PRICE_E8 || "250000000000");
-    feed = (await deploy("OperatorPriceFeed", { ...opts, args: [8, "ETH / USD (operator)", initial, deployer] })).address;
-  } else {
-    feed = process.env.PRICE_FEED || live.feed;
-  }
 
   const treasury = env("TREASURY_ADDRESS") || deployer;
   const attester = env("ATTESTER_PRIVATE_KEY")
@@ -62,6 +56,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const keeper = env("KEEPER_PRIVATE_KEY")
     ? new ethers.Wallet(env("KEEPER_PRIVATE_KEY")).address
     : deployer;
+
+  if (isLocal || process.env.ORACLE_MODE === "operator") {
+    const initial = BigInt(process.env.INITIAL_ETH_PRICE_E8 || "250000000000");
+    // On a live chain the operator feed belongs to the keeper, so a hosted demo never needs the deployer key.
+    const oracleOwner = isLocal ? deployer : keeper;
+    feed = (await deploy("OperatorPriceFeed", { ...opts, args: [8, "ETH / USD (operator)", initial, oracleOwner] })).address;
+  } else {
+    feed = process.env.PRICE_FEED || live.feed;
+  }
 
   const router = (await deploy("AquaPrimeRouter", { ...opts, args: [aqua, weth, deployer] })).address;
   const builder = (await deploy("StrategyBuilder", { ...opts, args: [] })).address;

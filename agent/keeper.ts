@@ -31,7 +31,7 @@ const REGISTRY_ABI = [
 async function main() {
   const provider = new ethers.JsonRpcProvider(RPC);
   const { chainId } = await provider.getNetwork();
-  const dep = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "frontend", "src", "config", "deployments", `${chainId}.json`), "utf8"));
+  const dep = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "frontend", "src", "config", "deployments", `${process.env.MARKET ? `${chainId}-${process.env.MARKET}` : chainId}.json`), "utf8"));
   const wallet = new ethers.Wallet(process.env.KEEPER_PRIVATE_KEY!, provider);
   const registry = new ethers.Contract(dep.contracts.registry, REGISTRY_ABI, wallet);
   const borrowers = new Set<string>();
