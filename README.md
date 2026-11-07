@@ -4,6 +4,8 @@
 
 **Lenders never deposit. Borrowers are never wiped out. Liquidation quotes never leak.**
 
+![AquaPrime Interface](./preview.png)
+
 AquaPrime is a credit market built on **1inch Aqua + SwapVM**. LP capital stays in the LP's own wallet and is
 `aqua.pull()`ed only at the moment a loan is drawn. When a position goes underwater, the registry ships a
 **custom SwapVM program (opcode `0xf0`)** that auctions *only the exact slice of collateral* needed to restore
