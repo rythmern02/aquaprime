@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="sliceGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF5B24" />
+      <stop offset="50%" stop-color="#FF8A00" />
+      <stop offset="100%" stop-color="#1FC2E3" />
+    </linearGradient>
+    <filter id="neon" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="64" fill="#0B0B0A" />
+
+  <!-- Outer Isometric Cube (Hairline Rules) -->
+  <g stroke="#EDEBE5" stroke-width="2.5" fill="none" opacity="0.4" stroke-linejoin="round">
+    <!-- Top Face -->
+    <polygon points="256,120 380,188 256,256 132,188" />
+    <!-- Left Face -->
+    <polygon points="132,188 256,256 256,392 132,324" />
+    <!-- Right Face -->
+    <polygon points="256,256 380,188 380,324 256,392" />
+  </g>
+
+  <!-- Internal Transparency Structural Lines -->
+  <g stroke="#EDEBE5" stroke-width="1.5" stroke-dasharray="4 4" fill="none" opacity="0.2">
+    <line x1="132" y1="188" x2="256" y2="120" />
+    <line x1="380" y1="324" x2="256" y2="392" />
+  </g>
+
+  <!-- The Surgical Slice (Opcode 0xf0 Dynamic Cut) -->
+  <g filter="url(#neon)">
+    <polygon points="256,170 330,212 256,350 182,308" fill="url(#sliceGlow)" opacity="0.9" />
+    <!-- Core Laser Blade Edge -->
+    <line x1="256" y1="170" x2="256" y2="350" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" />
+  </g>
+</svg>

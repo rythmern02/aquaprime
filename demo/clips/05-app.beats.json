@@ -1,0 +1,28 @@
+{
+ "beats": {
+  "lend": 2.646,
+  "borrow": 16.508,
+  "world": 27.789,
+  "crash": 50.92,
+  "rescue": 60.751,
+  "ship": 62.896,
+  "denied": 68.252,
+  "approve": 71.278,
+  "filled": 76.541,
+  "inspect": 91.363
+ },
+ "popup": {
+  "opened": 35.963,
+  "closed": 49.989
+ },
+ "facts": {
+  "hfBorrow": "Health factor 1.111",
+  "world": "09:00:45Human Prime tier unlocked on-chain — 115% collateral + 3-minute grace0xe606…aab7",
+  "crashPrice": 1650,
+  "human": true,
+  "hfCrash": "Health factor 0.957",
+  "fill": "09:01:13Surgical fill executed in one tx · approved via Local test IdP — NOT World0xb99b…c12e",
+  "hfAfter": "Health factor 1.020",
+  "card": "A legacy close-factor liquidation would have sold ≈4.77 WETH at a fixed 5% bonus — you kept 0.30 WETH more."
+ }
+}

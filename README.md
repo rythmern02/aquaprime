@@ -1,4 +1,6 @@
-# AquaPrime — Zero-Custody Prime Credit & Surgical Liquidations
+# AquaPrime: Zero-Custody Prime Credit & Surgical Liquidations
+
+![AquaPrime Cover](./cover.jpg)
 
 **Lenders never deposit. Borrowers are never wiped out. Liquidation quotes never leak.**
 
@@ -11,10 +13,10 @@ approval. All reads go through **EF Anon-RPC**, so RPC providers can't front-run
 | | Aave / Compound / Morpho | AquaPrime |
 |---|---|---|
 | LP capital | locked in a pool contract | stays in LP wallet (Aqua virtual balances), reusable across strategies |
-| Liquidation size | fixed close factor (50–100%) | exact slice that restores HF to 1.02 — enforced inside the VM |
-| Liquidation price | fixed penalty (5–10%) | Dutch auction ramping 1.5% → 6% |
-| Who absorbs collateral | liquidator inventory | LP wallets via an oracle-priced SwapVM bid (`0xf1`) — zero-capital keepers |
-| Sybil handling | everyone at 150%+ | World ID Proof of Human → 115% + 3-minute grace window |
+| Liquidation size | fixed close factor (50% to 100%) | exact slice that restores HF to 1.02, enforced inside the VM |
+| Liquidation price | fixed penalty (5% to 10%) | Dutch auction ramping 1.5% -> 6% |
+| Who absorbs collateral | liquidator inventory | LP wallets via an oracle-priced SwapVM bid (`0xf1`) with zero-capital keepers |
+| Sybil handling | everyone at 150%+ | World ID Proof of Human -> 115% + 3-minute grace window |
 | Quote privacy | public RPC sees every `eth_call` | Anon-RPC by default |
 
 ---
@@ -127,7 +129,7 @@ from that wallet; the registry holds 0 USDC. Browser reads go through Anon-RPC o
 
 Next to the canonical market above, a **clearly labelled demo market** lets judges run the whole lifecycle on Sepolia
 with no wallet: its price feed is an `OperatorPriceFeed` (owned by the keeper) instead of Chainlink, so ETH can be
-"crashed" on demand. Everything else is real — the same canonical 1inch Aqua, Circle USDC and WETH, the same maker
+"crashed" on demand. Everything else is real: the same canonical 1inch Aqua, Circle USDC and WETH, the same maker
 wallet (its 15 USDC backs both markets at once). Agent Pass approvals on the hosted site come from a **hosted test
 IdP labelled "NOT World"** until World allow-lists the app; the backend validates it exactly like auth.world.org.
 All six contracts are Sourcify exact-match.
@@ -203,16 +205,16 @@ npm run demo:local
 ```
 This boots a hardhat chain, deploys and seeds AquaPrime, opens a borrower (HF 1.11), and starts the Agent Pass test IdP
 and the web app on http://localhost:3000. Agent Pass approvals in this mode come from the local test IdP, and the
-keeper console labels them **"Local test IdP — NOT World"**. Export `WORLD_AUTH_ISSUER/CLIENT_ID/CLIENT_SECRET` to use World.
+keeper console labels them **"Local test IdP (NOT World)"**. Export `WORLD_AUTH_ISSUER/CLIENT_ID/CLIENT_SECRET` to use World.
 
-### Demo script (≈3 min)
+### Demo script (~3 min)
 1. **Panel 1:** the gauge shows 3.0x SLAC. The wallet balance doesn't change while three strategies are live. Click **Dock** to retire one: still zero transfers.
-2. **Panel 3:** deposit 10 WETH and borrow. The console shows USDC moving LP wallet → borrower via `aqua.pull`.
-3. **Verify with World IDKit** (simulator) → the tier flips to 115% and you can borrow more. Cancelling in World leaves the tier unchanged.
-4. Drag the oracle to $1,900 → HF turns red. The keeper agent ships the `0xf0` auction and pauses.
-5. **Panel 2:** the bytecode tab shows `f0 28 …` as a custom instruction. The register table shows `balanceOut` capped from all collateral down to the surgical slice, live from `router.quote()`.
-6. **Test Denied / Cancelled Path** → HTTP 403, *Action Blocked*, no transaction.
-7. **Approve Keeper via Agent Pass** → World approval → one transaction: auction fill + backstop `aqua.pull/push` + lender repaid. HF lands at exactly 1.02, with ~15–35% of collateral sold instead of 50–100%.
+2. **Panel 3:** deposit 10 WETH and borrow. The console shows USDC moving LP wallet -> borrower via `aqua.pull`.
+3. **Verify with World IDKit** (simulator) -> the tier flips to 115% and you can borrow more. Cancelling in World leaves the tier unchanged.
+4. Drag the oracle to $1,900 -> HF turns red. The keeper agent ships the `0xf0` auction and pauses.
+5. **Panel 2:** the bytecode tab shows `f0 28 ...` as a custom instruction. The register table shows `balanceOut` capped from all collateral down to the surgical slice, live from `router.quote()`.
+6. **Test Denied / Cancelled Path** -> HTTP 403, *Action Blocked*, no transaction.
+7. **Approve Keeper via Agent Pass** -> World approval -> one transaction: auction fill + backstop `aqua.pull/push` + lender repaid. HF lands at exactly 1.02, with ~15% to 35% of collateral sold instead of 50% to 100%.
 
 ### Sepolia
 1. `cp .env.example .env` and fill `PRIVATE_KEY`, `ATTESTER_PRIVATE_KEY`, `KEEPER_PRIVATE_KEY`, `MAKER_PRIVATE_KEY`
@@ -303,19 +305,19 @@ replayed → **HTTP 403, no transaction** (`node scripts/e2e-agentpass.mjs run <
 
 ## CROPS
 
-* **C — Censorship resistance / control.** Every protocol action except borrowing is permissionless: anyone can
+* **C: Censorship resistance / control.** Every protocol action except borrowing is permissionless: anyone can
   `startAuction`, fill the `0xf0` order directly, `closeAuction`, or repay. Pausing only stops *new* borrows, never repayment or
   liquidation. LPs can `aqua.dock` at any time. If the AquaPrime backend disappears, positions stay fully operable on-chain.
   If the oracle goes stale, liquidations halt (`StalePrice`) rather than run on bad data.
-* **O — Open source.** AquaPrime's own code is MIT (see `LICENSE`) and builds with `npm test` / `npm run build`.
+* **O: Open source.** AquaPrime's own code is MIT (see `LICENSE`) and builds with `npm test` / `npm run build`.
   It depends on 1inch Aqua/SwapVM, which are published source-available under Degensoft licenses (`LICENSES/`), and
   template-derived files keep that header.
-* **P — Privacy.** All browser JSON-RPC reads (balances, health, `liquidationQuote`, `router.quote`) go through EF
+* **P: Privacy.** All browser JSON-RPC reads (balances, health, `liquidationQuote`, `router.quote`) go through EF
   **Anon-RPC** (hash-pinned worker in a null-origin iframe), fail-closed with an explicit opt-out. The only intentional
   exclusion is a `localhost` RPC (an anonymity network can't reach it), and the badge says so. No trackers or analytics; fonts are
   self-hosted at build time; `Referrer-Policy: no-referrer`. World ID shares only a nullifier, never identity data.
   Third parties learn: World learns that an RP verified, and the RPC learns nothing linkable to you.
-* **S — Security.** Keys stay in the user's wallet. Server keys (attester, keeper, RP signing, OIDC client) are
+* **S: Security.** Keys stay in the user's wallet. Server keys (attester, keeper, RP signing, OIDC client) are
   server-only env vars and never reach the client bundle. The keeper's on-chain power is limited to filling surgical slices
   (`0xf0` caps every fill), and the executor is operator-allow-listed. Approvals are single-use, short-lived and
   action-bound. **Not audited. Hackathon code.**
@@ -330,5 +332,5 @@ replayed → **HTTP 403, no transaction** (`node scripts/e2e-agentpass.mjs run <
   are not included.
 
 ## License
-AquaPrime original code: MIT. Template-derived files and the 1inch dependencies keep their own licenses — see
+AquaPrime original code: MIT. Template-derived files and the 1inch dependencies keep their own licenses: see
 `LICENSES/` and `THIRD_PARTY_NOTICES`.
