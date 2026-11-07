@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     if (typeof seconds !== "number" || seconds <= 0 || seconds > 3600) throw new HttpError(400, "seconds out of range", "bad_request");
     const rpc = (method: string, params: unknown[]) =>
       fetch(serverRpcUrl(), {
-        method: "POST", headers: { "content-type": "application/json" },
+        method: "POST", headers: { "content-type": "application/json" }, cache: "no-store",
         body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
       }).then((r) => r.json());
     await rpc("evm_increaseTime", [seconds]);
