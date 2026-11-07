@@ -10,6 +10,8 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   output: "standalone",
+  // lets a dev server run beside a production build (e.g. `NEXT_DIST_DIR=.next-dev next dev -p 3001`)
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   async headers() {
     return [
       { source: "/((?!anon-rpc-iframe\\.html$).*)", headers: securityHeaders },
