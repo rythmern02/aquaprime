@@ -7,15 +7,17 @@ import { deployment } from "@/config";
 import { aquaAbi, registryAbi, tokenAbi } from "@/abi/generated";
 import { useReads } from "@/app/providers";
 import { revertReason, useTx, type LogLine } from "./useTx";
+import { readLease } from "@/components/app/DemoSession";
 
 const c = deployment.contracts;
 export type Log = (l: LogLine["level"], m: string, tx?: string) => void;
 
 export async function api<T>(path: string, body?: unknown) {
   let res: Response;
+  const lease = readLease(); // hosted demo session, if any
   try {
     res = await fetch(path, body === undefined ? undefined : {
-      method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body),
+      method: "POST", headers: { "content-type": "application/json", ...(lease ? { "x-demo-lease": lease.id } : {}) }, body: JSON.stringify(body),
     });
   } catch {
     // fetch only throws when the request never reached a server (restart, crash, offline)

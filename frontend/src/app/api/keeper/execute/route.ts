@@ -5,6 +5,7 @@ import { errorResponse, HttpError } from "@/server/env";
 import { assertExecutable, executeLiquidation } from "@/server/keeper";
 
 import { rateLimit } from "@/server/ratelimit";
+import { assertLease, demoBorrower, demoEnabled } from "@/server/demo";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,7 @@ export async function POST(req: Request) {
     const { attemptId, borrower } = (await req.json()) as { attemptId?: string; borrower?: string };
     if (!attemptId) throw new HttpError(403, "Human authorization denied: no Agent Pass approval presented", "missing_approval");
     if (!borrower || !isAddress(borrower)) throw new HttpError(400, "Invalid borrower", "bad_request");
+    if (demoEnabled() && borrower.toLowerCase() === demoBorrower().toLowerCase()) await assertLease(req.headers.get("x-demo-lease"));
 
     const action = {
       kind: "liquidate" as const,

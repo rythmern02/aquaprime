@@ -17,6 +17,7 @@ import { Activity, PositionCard } from "./Vitals";
 import { BytecodePanel } from "@/components/BytecodePanel";
 import { WorldIdPanel } from "./WorldIdPanel";
 import { Toaster } from "@/components/Toaster";
+import { DemoSessionBar, DemoStart, useDemoLease, type Lease } from "./DemoSession";
 
 const ease = [0.2, 0.8, 0.2, 1] as const;
 const E18 = 10n ** 18n;
@@ -42,7 +43,7 @@ function Field({ label, suffix, value, onChange, id }: { label: string; suffix: 
   );
 }
 
-function StartGate() {
+function StartGate({ onDemo }: { onDemo: (l: Lease) => void }) {
   const demo = useDemoWallet();
   const roles: [DemoRole, string, string][] = [
     ["borrower", "Borrower", "Fresh wallet with 20 WETH. Runs the whole story."],
@@ -75,6 +76,7 @@ function StartGate() {
         <WalletButton />
       </div>
       {demo.available && <p className="mt-6 max-w-md text-xs text-fg-4">Demo wallets use Hardhat&apos;s public test keys and only work on this local chain.</p>}
+      <DemoStart onReady={onDemo} />
     </div>
   );
 }
@@ -83,7 +85,10 @@ export function Playground() {
   const demo = useDemoWallet();
   const { lines, push } = useLog();
   const a = useAquaActions(push);
-  const me = a.account as Address | undefined;
+  const [lease, setLease] = useDemoLease();
+  // hosted demo: a judge without a wallet drives the server-held demo position
+  const spectator = !a.account && lease ? lease.borrower : undefined;
+  const me = (a.account ?? spectator) as Address | undefined;
   const market = useMarket();
   const maker = useMaker();
   const position = usePosition(me);
@@ -127,11 +132,17 @@ export function Playground() {
   const graceLeft = p?.auctionActive && p.auctionStart > now ? Number(p.auctionStart - now) : 0;
   const isMaker = !!me && !!maker.data && me.toLowerCase() === maker.data.maker.toLowerCase();
 
-  if (!me) return <div className="wrap pb-24 pt-32"><StartGate /></div>;
+  if (!me) return <div className="wrap pb-24 pt-32"><StartGate onDemo={(l) => { setLease(l); setStep("stress"); }} /></div>;
 
   const go = (s: StepId) => setStep(s);
   const busy = !!a.busy;
   const stage = (() => {
+    if (spectator && (step === "borrow" || step === "verify")) return (
+      <>
+        <p className="text-fg-2">This live session drives a server-held demo position, so it can&apos;t sign for you. To {step === "borrow" ? "open your own position" : "verify with World ID"}, connect a wallet on Sepolia.</p>
+        <div className="flex flex-wrap gap-3"><WalletButton /><button className="btn-ghost" onClick={() => setStep("stress")}>Back to the rescue</button></div>
+      </>
+    );
     switch (step) {
       case "lend": return (
         <>
@@ -362,6 +373,7 @@ export function Playground() {
       <aside className="flex flex-col gap-5" aria-label="Your position">
         {position.isError ? <div className="panel p-6 text-sm text-signal">Couldn&apos;t read your position. Is the chain running?</div> : <PositionCard pos={p} price={market.data?.price} />}
         {demo.active && <div className="text-center text-[11px] text-fg-4">{DEMO_ROLES[demo.role!].label} · {short(demo.address)}</div>}
+        {lease && <DemoSessionBar lease={lease} onEnd={() => { setLease(undefined); setStep("lend"); }} />}
         <Activity lines={lines} />
       </aside>
 

@@ -5,6 +5,7 @@ import { errorResponse, HttpError } from "@/server/env";
 import { planLiquidation } from "@/server/keeper";
 
 import { rateLimit } from "@/server/ratelimit";
+import { assertLease, demoBorrower, demoEnabled } from "@/server/demo";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,7 @@ export async function POST(req: Request) {
     await rateLimit(req, "agentpass-start", 20, 60000);
     const { borrower } = (await req.json()) as { borrower?: string };
     if (!borrower || !isAddress(borrower)) throw new HttpError(400, "Invalid borrower", "bad_request");
+    if (demoEnabled() && borrower.toLowerCase() === demoBorrower().toLowerCase()) await assertLease(req.headers.get("x-demo-lease"));
     const plan = await planLiquidation(borrower as Address);
     const res = await startApproval({
       kind: "liquidate",
