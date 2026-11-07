@@ -36,7 +36,8 @@ export const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || "http://127.0.0.1:8545
  * fail-closed client. Override with NEXT_PUBLIC_RPC_FALLBACKS (comma-separated).
  */
 const DEFAULT_FALLBACKS: Record<number, string[]> = {
-  11155111: ["https://ethereum-sepolia-rpc.publicnode.com", "https://sepolia.drpc.org", "https://1rpc.io/sepolia", "https://rpc.sepolia.org"],
+  // checked Nov 2026: drpc refuses Sepolia on its free plan, 1rpc caps quotas, rpc.sepolia.org times out
+  11155111: ["https://ethereum-sepolia-rpc.publicnode.com", "https://sepolia.gateway.tenderly.co"],
   1: ["https://ethereum-rpc.publicnode.com", "https://eth.drpc.org", "https://1rpc.io/eth"],
 };
 export function rpcList(chainId: number, primary?: string): string[] {
@@ -57,7 +58,8 @@ export const deployment: Deployment = (() => {
 
 export const chain = (() => {
   if (CHAIN_ID === hardhat.id) return defineChain({ ...hardhat, rpcUrls: { default: { http: [RPC_URL] } } });
-  if (CHAIN_ID === sepolia.id) return defineChain({ ...sepolia, rpcUrls: { default: { http: [RPC_URL] } } });
+  // Sepolia's base fee is a few wei; RPCs suggest a near-zero tip that can stall inclusion. Pin a modest one.
+  if (CHAIN_ID === sepolia.id) return defineChain({ ...sepolia, rpcUrls: { default: { http: [RPC_URL] } }, fees: { maxPriorityFeePerGas: 50_000_000n } });
   if (CHAIN_ID === mainnet.id) return defineChain({ ...mainnet, rpcUrls: { default: { http: [RPC_URL] } } });
   return defineChain({
     id: CHAIN_ID, name: `chain-${CHAIN_ID}`, nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },

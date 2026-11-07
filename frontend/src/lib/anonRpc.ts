@@ -12,7 +12,8 @@ import { CHAIN_ID, rpcList } from "@/config";
 let worker: AnonRpcWorker | undefined;
 
 /** True for failures where another endpoint may succeed (rate limit, outage), not for genuine RPC errors. */
-export const isTransient = (status: number, code?: number) => status === 429 || status >= 500 || code === -32005 || code === 429;
+/** Anything except a genuine execution error (revert) may succeed on another endpoint: rate limits, plan limits, outages. */
+export const isTransient = (status: number, code?: number, message = "") => status === 429 || status >= 500 || code === -32005 || code === 429 || !/revert/i.test(message);
 
 /**
  * The bootstrap only reads the public worker-registry contract (nothing user-specific), so falling back
@@ -34,7 +35,7 @@ function bootstrapProvider() {
             body: JSON.stringify({ jsonrpc: "2.0", id: ++id, method, params: params ?? [] }),
           });
           const j = await res.json().catch(() => ({ error: { code: res.status, message: `HTTP ${res.status}` } }));
-          if (j.error && isTransient(res.status, j.error.code)) { last = new Error(j.error.message); continue; }
+          if (j.error && isTransient(res.status, j.error.code, j.error.message)) { last = new Error(j.error.message); continue; }
           if (j.error) throw new Error(j.error.message);
           preferred = i;
           return j.result;

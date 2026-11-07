@@ -35,6 +35,8 @@ export interface StoreShape {
   demo?: { lease?: { id: string; until: number; borrower: string }; day?: string; total?: number; perClient?: Record<string, number> };
   /** test IdP: authorization codes already redeemed (single use), keyed by code id → expiry ms */
   idpUsed?: Record<string, number>;
+  /** block of the last server-confirmed tx — reads pin at or after it (read-your-writes) */
+  lastTxBlock?: number;
   /** fixed-window rate-limit buckets */
   rl?: Record<string, { count: number; resetAt: number }>;
 }
@@ -88,7 +90,11 @@ async function transactRedis<T>(fn: (s: StoreShape) => T | Promise<T>): Promise<
 
 /* ───────────── file backend ───────────── */
 
-const FILE = path.join(process.cwd(), ".data", "store.json");
+// one file per chain/market so a local-chain server and a Sepolia server on the same machine never share
+// approvals or the operator binding (the local chain keeps the original file name)
+const SCOPE = process.env.NEXT_PUBLIC_MARKET || (process.env.NEXT_PUBLIC_CHAIN_ID && process.env.NEXT_PUBLIC_CHAIN_ID !== "31337")
+  ? `-${process.env.NEXT_PUBLIC_CHAIN_ID || "local"}-${process.env.NEXT_PUBLIC_MARKET || "main"}` : "";
+const FILE = path.join(process.cwd(), ".data", `store${SCOPE}.json`);
 let queue: Promise<unknown> = Promise.resolve();
 
 async function load(): Promise<StoreShape> {

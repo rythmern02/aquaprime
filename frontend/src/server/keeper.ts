@@ -2,7 +2,7 @@ import "server-only";
 import { type Address, type Hex } from "viem";
 import { deployment, toOrder } from "@/config";
 import { executorAbi, registryAbi } from "@/abi/generated";
-import { serverPublicClient, walletFromEnv } from "./chain";
+import { freshBlock, sendTx, serverPublicClient, walletFromEnv } from "./chain";
 import { HttpError } from "./env";
 
 const E18 = 10n ** 18n;
@@ -24,9 +24,10 @@ export interface KeeperPlan {
 export async function planLiquidation(borrower: Address): Promise<KeeperPlan> {
   const pc = serverPublicClient();
   const c = deployment.contracts;
+  const blockNumber = await freshBlock(pc);
   const [q, block] = await Promise.all([
-    pc.readContract({ address: c.registry, abi: registryAbi, functionName: "liquidationQuote", args: [borrower] }),
-    pc.getBlock(),
+    pc.readContract({ address: c.registry, abi: registryAbi, functionName: "liquidationQuote", args: [borrower], blockNumber }),
+    pc.getBlock({ blockNumber }),
   ]);
   const plan: KeeperPlan = {
     borrower,
@@ -52,13 +53,7 @@ export async function startAuction(borrower: Address): Promise<Hex> {
   if (plan.healthFactor >= E18) throw new HttpError(409, "Position is healthy (HF ≥ 1.0)", "healthy");
   if (plan.auctionActive) throw new HttpError(409, "Auction already running", "auction_active");
   const wallet = walletFromEnv("KEEPER_PRIVATE_KEY");
-  const pc = serverPublicClient();
-  const { request } = await pc.simulateContract({
-    account: wallet.account, address: c.registry, abi: registryAbi, functionName: "startAuction", args: [borrower],
-  });
-  const h = await wallet.writeContract(request);
-  await pc.waitForTransactionReceipt({ hash: h });
-  return h;
+  return (await sendTx("Ship auction", wallet, { address: c.registry, abi: registryAbi, functionName: "startAuction", args: [borrower] })).hash;
 }
 
 /** Pre-flight for the protected action; never consumes an approval. */
@@ -79,16 +74,7 @@ export async function executeLiquidation(borrower: Address): Promise<Hex> {
   const c = deployment.contracts;
   const backstop = toOrder(deployment.strategies!.backstop!.order);
   const wallet = walletFromEnv("KEEPER_PRIVATE_KEY");
-  const pc = serverPublicClient();
-  const { request } = await pc.simulateContract({
-    account: wallet.account,
-    address: c.executor,
-    abi: executorAbi,
-    functionName: "liquidate",
-    args: [borrower, backstop, 0n, 0n, wallet.account.address],
-  });
-  const h = await wallet.writeContract(request);
-  const receipt = await pc.waitForTransactionReceipt({ hash: h });
-  if (receipt.status !== "success") throw new HttpError(502, "Liquidation transaction reverted", "reverted");
-  return h;
+  return (await sendTx("Liquidation", wallet, {
+    address: c.executor, abi: executorAbi, functionName: "liquidate", args: [borrower, backstop, 0n, 0n, wallet.account.address],
+  })).hash;
 }

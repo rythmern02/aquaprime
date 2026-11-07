@@ -32,7 +32,8 @@ export function makePublicClient(mode: ReadMode): PublicClient {
           const i = (preferred + k) % urls.length;
           try {
             r = await privateRpcFetch(urls[i], { jsonrpc: "2.0", id: ++rpcId, method, params: params ?? [] });
-            if (r?.error && (r.error.code === -32005 || r.error.code === 429)) { lastErr = new Error(r.error.message); r = undefined; continue; }
+            // only a genuine execution error (revert) is final; rate/plan limits and outages rotate to the next RPC
+            if (r?.error && !/revert/i.test(r.error.message)) { lastErr = new Error(r.error.message); r = undefined; continue; }
             preferred = i; break;
           } catch (e) { lastErr = e; r = undefined; }
         }
