@@ -43,6 +43,23 @@ export function useAquaActions(log: Log) {
     if (cur < amount) log("info", "Approval granted", await send("approve", { address: token, abi: tokenAbi as never, functionName: "approve", args: [spender, amount] }));
   };
 
+  /**
+   * Pick a credit line from the chain, not from build-time config: the configured line can be docked,
+   * drained, or (on a reset local chain) not exist at all. Prefer the configured hash, then the newest
+   * registered line with enough virtual USDC left.
+   */
+  const resolveCreditLine = async (amt: bigint): Promise<Hex> => {
+    const available = (h: Hex) => client.readContract({ address: c.registry, abi: registryAbi, functionName: "creditLineAvailable", args: [h] });
+    const configured = deployment.strategies?.creditLine?.hash as Hex | undefined;
+    if (configured && (await available(configured)) >= amt) return configured;
+    const n = await client.readContract({ address: c.registry, abi: registryAbi, functionName: "creditLineCount" });
+    for (let i = n; i > 0n; i--) {
+      const h = await client.readContract({ address: c.registry, abi: registryAbi, functionName: "creditLineList", args: [i - 1n] }) as Hex;
+      if ((await available(h)) >= amt) return h;
+    }
+    throw new Error(n === 0n ? "No credit line is registered on this chain yet" : "No credit line has enough liquidity for that amount. Try borrowing less.");
+  };
+
   return {
     busy: busy ?? pending,
     account,
@@ -55,8 +72,7 @@ export function useAquaActions(log: Log) {
       }
       const amt = parseUnits(borrowUsdc || "0", 6);
       if (amt > 0n) {
-        const line = creditLine ?? deployment.strategies?.creditLine?.hash;
-        if (!line) throw new Error("No credit line available");
+        const line = creditLine ?? await resolveCreditLine(amt);
         log("ok", `Borrowed ${borrowUsdc} USDC — pulled straight from the lender's wallet via aqua.pull`, await send("borrow", { address: c.registry, abi: registryAbi as never, functionName: "borrow", args: [amt, line] }));
       }
     }),
