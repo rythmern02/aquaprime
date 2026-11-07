@@ -1,8 +1,8 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { IDKitRequestWidget, proofOfHuman, type RpContext } from "@worldcoin/idkit";
+import type { RpContext } from "@worldcoin/idkit";
 import { Activity as ActivityIcon, ArrowRight, Check, Code2, Droplets, Fingerprint, HandCoins, Loader2, ShieldAlert, Sparkles, TrendingDown, Wallet, X, Zap } from "lucide-react";
 import type { Address } from "viem";
 import { CHAIN_ID, deployment, WORLD } from "@/config";
@@ -15,6 +15,7 @@ import { bps, eth, short, usd } from "@/lib/format";
 import { WalletButton } from "@/components/SiteNav";
 import { Activity, PositionCard } from "./Vitals";
 import { BytecodePanel } from "@/components/BytecodePanel";
+import { WorldIdPanel } from "./WorldIdPanel";
 
 const ease = [0.2, 0.8, 0.2, 1] as const;
 const E18 = 10n ** 18n;
@@ -114,6 +115,7 @@ export function Playground() {
   const [idkitOpen, setIdkitOpen] = useState(false);
 
   useEffect(() => { if (market.data?.price) setPrice(Number(market.data.price) / 1e6); }, [market.data?.price]);
+  const onWorldFail = useCallback((code: string) => { setIdkitOpen(false); push("warn", `World ID not completed (${code}) — your tier is unchanged`); }, [push]);
 
   const preview = useMemo(() => {
     if (!p) return undefined;
@@ -187,6 +189,11 @@ export function Playground() {
           </div>
           {p?.human ? (
             <div className="tag w-fit border-ok/40 bg-ok/10 text-ok"><Check className="h-3 w-3" aria-hidden /> Verified human — Prime tier active</div>
+          ) : rp && idkitOpen ? (
+            <WorldIdPanel rp={rp} appId={WORLD.appId} action={WORLD.action} environment={WORLD.environment} signal={me.toLowerCase()}
+              onProof={async (r) => { await a.verifyProof(r); setIdkitOpen(false); go("stress"); }}
+              onCancel={() => { setIdkitOpen(false); push("info", "World ID cancelled — your tier is unchanged"); }}
+              onFail={onWorldFail} />
           ) : (
             <div className="flex flex-wrap gap-3">
               <button className="btn-primary" disabled={busy || !WORLD.appId} onClick={async () => { const r = await a.rpContext(); if (r) { setRp(r); setIdkitOpen(true); } }}>
@@ -194,15 +201,6 @@ export function Playground() {
               </button>
               <button className="btn-ghost" onClick={() => go("stress")}>Skip — stay anonymous</button>
             </div>
-          )}
-          {WORLD.environment !== "production" && !p?.human && (
-            <p className="text-xs text-fg-4">Staging: scan with <a className="text-fg underline" href="https://simulator.worldcoin.org" target="_blank" rel="noreferrer">simulator.worldcoin.org</a> → Scan → Paste code.</p>
-          )}
-          {rp && (
-            <IDKitRequestWidget open={idkitOpen} onOpenChange={setIdkitOpen} app_id={WORLD.appId} action={WORLD.action} rp_context={rp}
-              allow_legacy_proofs={true} environment={WORLD.environment} preset={proofOfHuman({ signal: me.toLowerCase() })}
-              handleVerify={a.verifyProof} onSuccess={() => go("stress")}
-              onError={(code) => push("warn", `World ID not completed (${code}) — your tier is unchanged`)} />
           )}
         </>
       );
@@ -222,8 +220,30 @@ export function Playground() {
                   <div className="rounded-md border border-rule bg-bg p-3"><div className="label">0xf0 sells</div><div className="num text-xl">{(preview.surgical.collateralOut + preview.surgical.fee).toFixed(3)}</div></div>
                 </div>
               )}
-              <button className="btn-signal self-start" disabled={busy} onClick={async () => { if (await a.setOracle(price)) { if (preview && preview.hf < 1) go("rescue"); } }}>
-                <TrendingDown className="h-4 w-4" aria-hidden /> Push ${price.toLocaleString()} on-chain
+              {preview && (
+                preview.hf >= 1 ? (
+                  <div className="rounded-md border border-rule bg-panel/60 p-3 text-xs text-fg-3 flex items-center gap-2">
+                    <span className="text-ok font-bold">●</span>
+                    <span>Position is healthy (HF {preview.hf === Infinity ? "∞" : preview.hf.toFixed(3)}). Drag ETH below <strong className="text-signal">${preview.liqPrice.toFixed(0)}</strong> to trigger insolvency &amp; enable the rescue step.</span>
+                  </div>
+                ) : (
+                  <div className="rounded-md border border-signal/40 bg-signal/10 p-3 text-xs text-signal flex items-center gap-2">
+                    <span className="font-bold">⚠️</span>
+                    <span><strong>Position Underwater!</strong> (HF {preview.hf.toFixed(3)} &lt; 1.0). Pushing on-chain will open the 0xf0 auction and activate the rescue flow.</span>
+                  </div>
+                )
+              )}
+              <button className={`${preview && preview.hf < 1 ? "btn-signal" : "btn-primary"} self-start`} disabled={busy} onClick={async () => {
+                const ok = await a.setOracle(price);
+                if (ok) {
+                  if (preview && preview.hf < 1) {
+                    go("rescue");
+                  } else {
+                    push("info", `Oracle updated to $${price.toLocaleString()}. Drag below $${preview?.liqPrice.toFixed(0)} to crash ETH into liquidation.`);
+                  }
+                }
+              }}>
+                <TrendingDown className="h-4 w-4" aria-hidden /> {preview && preview.hf < 1 ? `Crash ETH to $${price.toLocaleString()} & Go to Rescue →` : `Push $${price.toLocaleString()} on-chain`}
               </button>
             </>
           ) : (
@@ -289,7 +309,7 @@ export function Playground() {
               <li key={s.id} className="shrink-0 lg:border-b lg:border-rule">
                 <button onClick={() => go(s.id)} aria-current={active ? "step" : undefined}
                   className={`focus-ring relative flex w-full items-center gap-3 px-3 py-3 text-left transition-colors lg:px-2 ${active ? "text-fg" : "text-fg-3 hover:text-fg"}`}>
-                  {active && <motion.span layoutId="step-bar" className="absolute bottom-0 left-0 h-[2px] w-full bg-signal lg:inset-y-0 lg:h-auto lg:w-[2px]" />}
+                  {active && <motion.span layoutId="step-bar" className="absolute bottom-0 left-0 h-[2px] w-full bg-ocean lg:inset-y-0 lg:h-auto lg:w-[3px]" />}
                   <span className={`num w-5 text-xs ${done[s.id] ? "text-ok" : "text-fg-4"}`}>{done[s.id] ? <Check className="h-3.5 w-3.5" aria-hidden /> : String(i + 1).padStart(2, "0")}</span>
                   <span>
                     <span className="block text-sm font-medium">{s.label}</span>
@@ -327,7 +347,7 @@ export function Playground() {
       {/* VM drawer */}
       <AnimatePresence>
         {vmOpen && (
-          <motion.div className="fixed inset-0 z-50 flex justify-end bg-black/70" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          <motion.div className="fixed inset-0 z-50 flex justify-end bg-fg/30 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={() => setVmOpen(false)} onKeyDown={(e) => e.key === "Escape" && setVmOpen(false)}>
             <motion.div role="dialog" aria-modal="true" aria-label="SwapVM inspector" className="h-full w-full max-w-xl overflow-auto border-l border-rule bg-bg p-4"
               initial={{ x: 60 }} animate={{ x: 0 }} exit={{ x: 60 }} transition={{ duration: 0.35, ease }} onClick={(e) => e.stopPropagation()}>
