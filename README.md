@@ -27,20 +27,20 @@ approval. All reads go through **EF Anon-RPC**, so RPC providers can't front-run
 
 ```mermaid
 flowchart LR
-  subgraph LP wallet (custody never moves)
-    U[100k USDC + WETH]
+  subgraph LP_Wallet ["LP wallet: custody never moves"]
+    U["100k USDC + WETH"]
   end
-  U -- aqua.ship --> A[Strategy A<br/>Credit line<br/>app = CreditPositionRegistry]
-  U -- aqua.ship --> B[Strategy B<br/>Backstop bid 0xf1<br/>app = AquaPrimeRouter]
-  U -- aqua.ship --> C[Strategy C<br/>XYC AMM<br/>app = AquaPrimeRouter]
-  Borrower -- deposit WETH / borrow --> R[CreditPositionRegistry]
-  A -- aqua.pull USDC → borrower --> Borrower
-  R -- HF<1: aqua.ship 0xf0 auction --> X[Registry-owned SwapVM order]
-  K[Keeper agent] -- Agent Pass human approval --> E[LiquidationExecutor]
-  E -- swap: fill 0xf0 slice --> X
-  E -- nested swap: sell WETH --> B
-  X -- postTransferIn hook --> R
-  R -- aqua.push repayment --> A
+  U -- "aqua.ship" --> A["Strategy A<br/>Credit line<br/>app = CreditPositionRegistry"]
+  U -- "aqua.ship" --> B["Strategy B<br/>Backstop bid 0xf1<br/>app = AquaPrimeRouter"]
+  U -- "aqua.ship" --> C["Strategy C<br/>XYC AMM<br/>app = AquaPrimeRouter"]
+  Borrower -- "deposit WETH / borrow" --> R["CreditPositionRegistry"]
+  A -- "aqua.pull USDC to borrower" --> Borrower
+  R -- "HF &lt; 1: aqua.ship 0xf0 auction" --> X["Registry-owned SwapVM order"]
+  K["Keeper agent"] -- "Agent Pass human approval" --> E["LiquidationExecutor"]
+  E -- "swap: fill 0xf0 slice" --> X
+  E -- "nested swap: sell WETH" --> B
+  X -- "postTransferIn hook" --> R
+  R -- "aqua.push repayment" --> A
 ```
 
 1. **Maker / SLAC.** One wallet backs three live strategies (credit line, liquidation backstop, AMM) with no tokens
