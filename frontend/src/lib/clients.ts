@@ -1,6 +1,6 @@
 "use client";
 import { createPublicClient, custom, http, type PublicClient } from "viem";
-import { chain, isLocalRpc, RPC_URL } from "@/config";
+import { chain, CHAIN_ID, isLocalRpc, RPC_URL, rpcList } from "@/config";
 import { privateRpcFetch } from "./anonRpc";
 
 export type ReadMode = "anon" | "direct-local" | "direct-optout";
@@ -18,14 +18,25 @@ export function initialReadMode(): ReadMode {
   return "anon";
 }
 
-let rpcId = 0;
+let rpcId = 0, preferred = 0;
 export function makePublicClient(mode: ReadMode): PublicClient {
   if (mode !== "anon") return createPublicClient({ chain, transport: http(RPC_URL, { batch: true }) }) as PublicClient;
+  const urls = rpcList(CHAIN_ID, RPC_URL);
   return createPublicClient({
     chain,
     transport: custom({
       async request({ method, params }) {
-        const r = await privateRpcFetch(RPC_URL, { jsonrpc: "2.0", id: ++rpcId, method, params: params ?? [] });
+        // every attempt still goes through the mixnet; we only rotate which public RPC the exit talks to
+        let r: { result?: unknown; error?: { code?: number; message: string; data?: unknown } } | undefined, lastErr: unknown;
+        for (let k = 0; k < urls.length; k++) {
+          const i = (preferred + k) % urls.length;
+          try {
+            r = await privateRpcFetch(urls[i], { jsonrpc: "2.0", id: ++rpcId, method, params: params ?? [] });
+            if (r?.error && (r.error.code === -32005 || r.error.code === 429)) { lastErr = new Error(r.error.message); r = undefined; continue; }
+            preferred = i; break;
+          } catch (e) { lastErr = e; r = undefined; }
+        }
+        if (!r) throw lastErr instanceof Error ? lastErr : new Error("All RPC endpoints failed");
         if (r.error) {
           const err = new Error(r.error.message) as Error & { code?: number; data?: unknown };
           err.code = r.error.code;

@@ -30,6 +30,20 @@ const DEPLOYMENTS = RAW as Record<number, Deployment>;
 export const CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID || 31337);
 export const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || "http://127.0.0.1:8545";
 
+/**
+ * Ordered RPC list for public-network reads: the configured RPC first, then independent public endpoints.
+ * Shared public RPCs rate-limit (HTTP 429) under load — a single one is a single point of failure for a
+ * fail-closed client. Override with NEXT_PUBLIC_RPC_FALLBACKS (comma-separated).
+ */
+const DEFAULT_FALLBACKS: Record<number, string[]> = {
+  11155111: ["https://ethereum-sepolia-rpc.publicnode.com", "https://sepolia.drpc.org", "https://1rpc.io/sepolia", "https://rpc.sepolia.org"],
+  1: ["https://ethereum-rpc.publicnode.com", "https://eth.drpc.org", "https://1rpc.io/eth"],
+};
+export function rpcList(chainId: number, primary?: string): string[] {
+  const extra = process.env.NEXT_PUBLIC_RPC_FALLBACKS?.split(",").map((s) => s.trim()).filter(Boolean) ?? DEFAULT_FALLBACKS[chainId] ?? [];
+  return [...new Set([primary, ...extra].filter((u): u is string => !!u))];
+}
+
 export const deployment: Deployment = (() => {
   const d = DEPLOYMENTS[CHAIN_ID];
   if (!d) throw new Error(`No AquaPrime deployment for chain ${CHAIN_ID}. Run the deploy script first.`);

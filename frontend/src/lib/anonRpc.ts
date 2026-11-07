@@ -1,5 +1,6 @@
 "use client";
 import { AnonRpcWorker } from "@anon-rpc/browser-harness";
+import { CHAIN_ID, rpcList } from "@/config";
 
 /**
  * EF Anon-RPC: every JSON-RPC read AquaPrime makes (Aqua balances, health factors, liquidation
@@ -10,19 +11,36 @@ import { AnonRpcWorker } from "@anon-rpc/browser-harness";
  */
 let worker: AnonRpcWorker | undefined;
 
+/** True for failures where another endpoint may succeed (rate limit, outage), not for genuine RPC errors. */
+export const isTransient = (status: number, code?: number) => status === 429 || status >= 500 || code === -32005 || code === 429;
+
+/**
+ * The bootstrap only reads the public worker-registry contract (nothing user-specific), so falling back
+ * across several public RPCs costs no privacy and removes a single point of failure.
+ */
 function bootstrapProvider() {
-  const url = process.env.NEXT_PUBLIC_ANON_BOOTSTRAP_RPC || "https://ethereum-rpc.publicnode.com";
-  let id = 0;
+  const urls = rpcList(CHAIN_ID, process.env.NEXT_PUBLIC_ANON_BOOTSTRAP_RPC || undefined);
+  if (!urls.length) urls.push("https://ethereum-rpc.publicnode.com");
+  let id = 0, preferred = 0;
   return {
     async request({ method, params }: { method: string; params?: unknown[] }) {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ jsonrpc: "2.0", id: ++id, method, params: params ?? [] }),
-      });
-      const j = await res.json();
-      if (j.error) throw new Error(j.error.message);
-      return j.result;
+      let last: unknown;
+      for (let k = 0; k < urls.length; k++) {
+        const i = (preferred + k) % urls.length;
+        try {
+          const res = await fetch(urls[i], {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ jsonrpc: "2.0", id: ++id, method, params: params ?? [] }),
+          });
+          const j = await res.json().catch(() => ({ error: { code: res.status, message: `HTTP ${res.status}` } }));
+          if (j.error && isTransient(res.status, j.error.code)) { last = new Error(j.error.message); continue; }
+          if (j.error) throw new Error(j.error.message);
+          preferred = i;
+          return j.result;
+        } catch (e) { last = e; }
+      }
+      throw last instanceof Error ? last : new Error("All bootstrap RPCs failed");
     },
   };
 }
