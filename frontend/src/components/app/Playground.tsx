@@ -16,6 +16,7 @@ import { WalletButton } from "@/components/SiteNav";
 import { Activity, PositionCard } from "./Vitals";
 import { BytecodePanel } from "@/components/BytecodePanel";
 import { WorldIdPanel } from "./WorldIdPanel";
+import { Toaster } from "@/components/Toaster";
 
 const ease = [0.2, 0.8, 0.2, 1] as const;
 const E18 = 10n ** 18n;
@@ -299,6 +300,26 @@ export function Playground() {
 
   return (
     <div className="wrap grid gap-6 pb-16 pt-24 lg:grid-cols-[200px_1fr_300px]">
+      {/* wallet state banners span the full width above the three columns */}
+      {a.wrongChain && (
+        <div role="alert" className="card flex flex-wrap items-center justify-between gap-4 border-warn/40 p-4 lg:col-span-3">
+          <p className="text-sm text-fg-2">
+            <span className="font-medium text-fg">Your wallet is on another network</span> (chain {a.walletChainId}). AquaPrime here runs on{" "}
+            <span className="font-mono text-fg">{CHAIN_ID === 31337 ? "Hardhat local · 31337" : `Sepolia · ${CHAIN_ID}`}</span>.
+          </p>
+          <button className="btn-ocean" disabled={a.switching} onClick={() => a.switchToApp()}>
+            {a.switching ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null} Switch network
+          </button>
+        </div>
+      )}
+      {!demo.active && CHAIN_ID === 31337 && !a.wrongChain && position.data && position.data.wethBal === 0n && !p?.debt && (
+        <div className="card flex flex-wrap items-center justify-between gap-4 p-4 lg:col-span-3">
+          <p className="text-sm text-fg-2">
+            <span className="font-medium text-fg">This wallet has no test funds on the local chain.</span> Use a demo wallet, or import one of Hardhat&apos;s public test accounts into your wallet.
+          </p>
+          <button className="btn-ghost" onClick={() => demo.enable("borrower")}>Use the borrower demo wallet</button>
+        </div>
+      )}
       {/* stepper */}
       <nav aria-label="Lifecycle" className="lg:sticky lg:top-28 lg:self-start">
         <div className="label mb-3 hidden lg:block">Lifecycle</div>
@@ -358,6 +379,7 @@ export function Playground() {
         )}
       </AnimatePresence>
       <button onClick={() => setVmOpen(true)} className="btn-ghost fixed bottom-5 right-5 z-30 lg:hidden"><ActivityIcon className="h-4 w-4" aria-hidden /> VM</button>
+      <Toaster lines={lines} />
     </div>
   );
 }

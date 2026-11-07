@@ -26,7 +26,7 @@ export async function api<T>(path: string, body?: unknown) {
 
 /** Every user-facing protocol action, shared by the playground steps. Each returns true on success. */
 export function useAquaActions(log: Log) {
-  const { send, pending, account } = useTx();
+  const { send, pending, account, wrongChain, walletChainId, switchToApp, switching } = useTx();
   const { client } = useReads();
   const [busy, setBusy] = useState<string | null>(null);
   const qc = useQueryClient();
@@ -63,6 +63,8 @@ export function useAquaActions(log: Log) {
   return {
     busy: busy ?? pending,
     account,
+    wrongChain, walletChainId, switching,
+    switchToApp: () => run("Switch network", async () => { await switchToApp(); log("ok", "Wallet switched to the app network"); }),
 
     depositAndBorrow: (collateralEth: string, borrowUsdc: string, creditLine?: Hex) => run("Deposit & borrow", async () => {
       const coll = parseEther(collateralEth || "0");

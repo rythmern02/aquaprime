@@ -27,7 +27,7 @@ const assert = (c, m) => { if (!c) throw new Error("ASSERT: " + m); console.log(
 
   await p.getByRole("button", { name: /Crash ETH/ }).click();
   await p.locator("#px").fill("2150");
-  await p.getByRole("button", { name: /Push \$2,150 on-chain/ }).click();
+  await p.getByRole("button", { name: /(Push \$2,150 on-chain|Crash ETH to \$2,150)/ }).click();
   await waitLog(/oracle → \$2,150/);
   await p.getByRole("heading", { name: "Rescue" }).waitFor();
   await p.waitForTimeout(1500);
